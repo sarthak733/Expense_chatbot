@@ -1,0 +1,13 @@
+# buf.gen.yaml — tells `buf generate` how to produce Go code
+# Run:  buf generate
+# Requires: protoc-gen-go and protoc-gen-connect-go on PATH
+#   go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+#   go install connectrpc.com/connect/cmd/protoc-gen-connect-go@latest
+version: v2
+plugins:
+  - local: protoc-gen-go
+    out: gen
+    opt: paths=source_relative
+  - local: protoc-gen-connect-go
+    out: gen
+    opt: paths=source_relative

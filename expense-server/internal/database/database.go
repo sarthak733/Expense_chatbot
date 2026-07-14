@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"os"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib" // blank import registers pgx driver
@@ -31,3 +32,15 @@ func New(dsn string) (*sql.DB, error) {
 
 	return db, nil
 }
+
+// InitSchema reads the SQL file and executes it to update the database schema.
+func InitSchema(db *sql.DB, schemaPath string) error {
+	content, err := os.ReadFile(schemaPath)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(string(content))
+	return err
+}
+

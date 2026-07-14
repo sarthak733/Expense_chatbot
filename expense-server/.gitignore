@@ -1,0 +1,30 @@
+# -----------------------------------------------------------------------
+# .gitignore — files that must NEVER be committed to version control
+# -----------------------------------------------------------------------
+
+# Private environment variables (real DB passwords, JWT secrets, etc.)
+.env
+.env.local
+.env.*.local
+
+# Go build artefacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test output
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Go module cache (Go manages this itself)
+vendor/
+
+# IDE / editor directories
+.idea/
+.vscode/
+*.swp
+*.swo

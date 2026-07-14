@@ -6,34 +6,58 @@ import (
 	"net/http"
 	"time"
 
+	"connectrpc.com/connect"
+
+	expensev1 "expense-server/gen/expense/v1"
 	"expense-server/internal/response"
 )
 
-// Handler holds dependencies required by your HTTP endpoints
+// Handler holds shared dependencies (DB) for all service implementations.
+// It satisfies both the generated ExpenseServiceHandler and HealthServiceHandler
+// interfaces — keeping the setup in main.go simple (one New() call).
 type Handler struct {
 	DB *sql.DB
 }
 
-// New returns a handler instance with dependencies injected
+// New returns a Handler with the database connection pool injected.
 func New(db *sql.DB) *Handler {
 	return &Handler{DB: db}
 }
 
+// ---------------------------------------------------------------------------
+// Plain HTTP handlers (not ConnectRPC — these are simple REST endpoints)
+// ---------------------------------------------------------------------------
+
+// Root is a bare HTTP GET "/" sanity check — no auth required.
 func (h *Handler) Root(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, "expense-server is running", nil)
 }
 
-func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
-	// Ping the DB to make sure it's genuinely healthy
-	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+// ---------------------------------------------------------------------------
+// HealthService — ConnectRPC implementation
+// ---------------------------------------------------------------------------
+
+// HealthCheck pings the database and reports overall server health.
+// This endpoint is deliberately unauthenticated so liveness probes
+// (Kubernetes, load balancers, etc.) never need a token.
+func (h *Handler) HealthCheck(
+	ctx context.Context,
+	_ *connect.Request[expensev1.HealthCheckRequest],
+) (*connect.Response[expensev1.HealthCheckResponse], error) {
+
+	pingCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
 	status := "healthy"
-	if err := h.DB.PingContext(ctx); err != nil {
-		status = "unhealthy (database unreachable)"
-		response.JSON(w, http.StatusServiceUnavailable, "error", map[string]string{"status": status})
-		return
+	msg := "ok"
+
+	if err := h.DB.PingContext(pingCtx); err != nil {
+		status = "unhealthy"
+		msg = "database unreachable"
 	}
 
-	response.JSON(w, http.StatusOK, "ok", map[string]string{"status": status})
+	return connect.NewResponse(&expensev1.HealthCheckResponse{
+		Status:  status,
+		Message: msg,
+	}), nil
 }
