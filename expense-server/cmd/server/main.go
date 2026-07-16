@@ -12,7 +12,10 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
 
+	"expense-server/ent"
 	"expense-server/gen/expense/v1/expensev1connect"
 	"expense-server/internal/config"
 	"expense-server/internal/database"
@@ -38,11 +41,15 @@ func main() {
 	defer db.Close()
 	log.Println("database connection pool established successfully")
  
-	// Run schema migrations/patches
-	if err := database.InitSchema(db, "migrations/schema_patch.sql"); err != nil {
+	// Run schema migrations
+	if err := database.ApplyMigrations(db, "migrations"); err != nil {
 		log.Fatalf("failed to run database migrations: %v", err)
 	}
-	log.Println("database schema initialized successfully")
+	// Seed default system categories
+	if err := database.SeedDefaultCategories(db); err != nil {
+		log.Fatalf("failed to seed default categories: %v", err)
+	}
+	log.Println("database schema initialized and seeded successfully")
 
 	// Start background recurring expense scheduler (runs check every hour by default)
 	schedInterval := 1 * time.Hour
@@ -57,8 +64,13 @@ func main() {
 
 
 
-	// 2. Initialize Handler (shared implementation of both services)
-	h := handler.New(db)
+	// 2. Initialize Ent Client from the existing sql.DB connection pool
+	drv := entsql.OpenDB(dialect.Postgres, db)
+	entClient := ent.NewClient(ent.Driver(drv))
+	defer entClient.Close()
+
+	// 3. Initialize Handler (shared implementation of both services)
+	h := handler.New(db, entClient)
 
 	// 3. Build the JWT interceptor — only applied to the ExpenseService.
 	authInterceptor := middleware.NewAuthInterceptor(cfg.JWTSecret, db)

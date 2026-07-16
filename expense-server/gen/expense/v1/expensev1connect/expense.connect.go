@@ -99,6 +99,12 @@ const (
 	// ExpenseServiceGetMonthlyInsightsProcedure is the fully-qualified name of the ExpenseService's
 	// GetMonthlyInsights RPC.
 	ExpenseServiceGetMonthlyInsightsProcedure = "/expense.v1.ExpenseService/GetMonthlyInsights"
+	// ExpenseServiceSendChatMessageProcedure is the fully-qualified name of the ExpenseService's
+	// SendChatMessage RPC.
+	ExpenseServiceSendChatMessageProcedure = "/expense.v1.ExpenseService/SendChatMessage"
+	// ExpenseServiceGetChatHistoryProcedure is the fully-qualified name of the ExpenseService's
+	// GetChatHistory RPC.
+	ExpenseServiceGetChatHistoryProcedure = "/expense.v1.ExpenseService/GetChatHistory"
 )
 
 // ExpenseServiceClient is a client for the expense.v1.ExpenseService service.
@@ -131,6 +137,9 @@ type ExpenseServiceClient interface {
 	QuickAddExpense(context.Context, *connect.Request[v1.QuickAddExpenseRequest]) (*connect.Response[v1.QuickAddExpenseResponse], error)
 	// Monthly Comparison Insights
 	GetMonthlyInsights(context.Context, *connect.Request[v1.GetMonthlyInsightsRequest]) (*connect.Response[v1.GetMonthlyInsightsResponse], error)
+	// Chat message & history
+	SendChatMessage(context.Context, *connect.Request[v1.SendChatMessageRequest]) (*connect.Response[v1.SendChatMessageResponse], error)
+	GetChatHistory(context.Context, *connect.Request[v1.GetChatHistoryRequest]) (*connect.Response[v1.GetChatHistoryResponse], error)
 }
 
 // NewExpenseServiceClient constructs a client for the expense.v1.ExpenseService service. By
@@ -276,6 +285,18 @@ func NewExpenseServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(expenseServiceMethods.ByName("GetMonthlyInsights")),
 			connect.WithClientOptions(opts...),
 		),
+		sendChatMessage: connect.NewClient[v1.SendChatMessageRequest, v1.SendChatMessageResponse](
+			httpClient,
+			baseURL+ExpenseServiceSendChatMessageProcedure,
+			connect.WithSchema(expenseServiceMethods.ByName("SendChatMessage")),
+			connect.WithClientOptions(opts...),
+		),
+		getChatHistory: connect.NewClient[v1.GetChatHistoryRequest, v1.GetChatHistoryResponse](
+			httpClient,
+			baseURL+ExpenseServiceGetChatHistoryProcedure,
+			connect.WithSchema(expenseServiceMethods.ByName("GetChatHistory")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -303,6 +324,8 @@ type expenseServiceClient struct {
 	parseExpenseText       *connect.Client[v1.ParseExpenseTextRequest, v1.ParseExpenseTextResponse]
 	quickAddExpense        *connect.Client[v1.QuickAddExpenseRequest, v1.QuickAddExpenseResponse]
 	getMonthlyInsights     *connect.Client[v1.GetMonthlyInsightsRequest, v1.GetMonthlyInsightsResponse]
+	sendChatMessage        *connect.Client[v1.SendChatMessageRequest, v1.SendChatMessageResponse]
+	getChatHistory         *connect.Client[v1.GetChatHistoryRequest, v1.GetChatHistoryResponse]
 }
 
 // CreateExpense calls expense.v1.ExpenseService.CreateExpense.
@@ -415,6 +438,16 @@ func (c *expenseServiceClient) GetMonthlyInsights(ctx context.Context, req *conn
 	return c.getMonthlyInsights.CallUnary(ctx, req)
 }
 
+// SendChatMessage calls expense.v1.ExpenseService.SendChatMessage.
+func (c *expenseServiceClient) SendChatMessage(ctx context.Context, req *connect.Request[v1.SendChatMessageRequest]) (*connect.Response[v1.SendChatMessageResponse], error) {
+	return c.sendChatMessage.CallUnary(ctx, req)
+}
+
+// GetChatHistory calls expense.v1.ExpenseService.GetChatHistory.
+func (c *expenseServiceClient) GetChatHistory(ctx context.Context, req *connect.Request[v1.GetChatHistoryRequest]) (*connect.Response[v1.GetChatHistoryResponse], error) {
+	return c.getChatHistory.CallUnary(ctx, req)
+}
+
 // ExpenseServiceHandler is an implementation of the expense.v1.ExpenseService service.
 type ExpenseServiceHandler interface {
 	CreateExpense(context.Context, *connect.Request[v1.CreateExpenseRequest]) (*connect.Response[v1.CreateExpenseResponse], error)
@@ -445,6 +478,9 @@ type ExpenseServiceHandler interface {
 	QuickAddExpense(context.Context, *connect.Request[v1.QuickAddExpenseRequest]) (*connect.Response[v1.QuickAddExpenseResponse], error)
 	// Monthly Comparison Insights
 	GetMonthlyInsights(context.Context, *connect.Request[v1.GetMonthlyInsightsRequest]) (*connect.Response[v1.GetMonthlyInsightsResponse], error)
+	// Chat message & history
+	SendChatMessage(context.Context, *connect.Request[v1.SendChatMessageRequest]) (*connect.Response[v1.SendChatMessageResponse], error)
+	GetChatHistory(context.Context, *connect.Request[v1.GetChatHistoryRequest]) (*connect.Response[v1.GetChatHistoryResponse], error)
 }
 
 // NewExpenseServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -586,6 +622,18 @@ func NewExpenseServiceHandler(svc ExpenseServiceHandler, opts ...connect.Handler
 		connect.WithSchema(expenseServiceMethods.ByName("GetMonthlyInsights")),
 		connect.WithHandlerOptions(opts...),
 	)
+	expenseServiceSendChatMessageHandler := connect.NewUnaryHandler(
+		ExpenseServiceSendChatMessageProcedure,
+		svc.SendChatMessage,
+		connect.WithSchema(expenseServiceMethods.ByName("SendChatMessage")),
+		connect.WithHandlerOptions(opts...),
+	)
+	expenseServiceGetChatHistoryHandler := connect.NewUnaryHandler(
+		ExpenseServiceGetChatHistoryProcedure,
+		svc.GetChatHistory,
+		connect.WithSchema(expenseServiceMethods.ByName("GetChatHistory")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/expense.v1.ExpenseService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ExpenseServiceCreateExpenseProcedure:
@@ -632,6 +680,10 @@ func NewExpenseServiceHandler(svc ExpenseServiceHandler, opts ...connect.Handler
 			expenseServiceQuickAddExpenseHandler.ServeHTTP(w, r)
 		case ExpenseServiceGetMonthlyInsightsProcedure:
 			expenseServiceGetMonthlyInsightsHandler.ServeHTTP(w, r)
+		case ExpenseServiceSendChatMessageProcedure:
+			expenseServiceSendChatMessageHandler.ServeHTTP(w, r)
+		case ExpenseServiceGetChatHistoryProcedure:
+			expenseServiceGetChatHistoryHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -727,4 +779,12 @@ func (UnimplementedExpenseServiceHandler) QuickAddExpense(context.Context, *conn
 
 func (UnimplementedExpenseServiceHandler) GetMonthlyInsights(context.Context, *connect.Request[v1.GetMonthlyInsightsRequest]) (*connect.Response[v1.GetMonthlyInsightsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("expense.v1.ExpenseService.GetMonthlyInsights is not implemented"))
+}
+
+func (UnimplementedExpenseServiceHandler) SendChatMessage(context.Context, *connect.Request[v1.SendChatMessageRequest]) (*connect.Response[v1.SendChatMessageResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("expense.v1.ExpenseService.SendChatMessage is not implemented"))
+}
+
+func (UnimplementedExpenseServiceHandler) GetChatHistory(context.Context, *connect.Request[v1.GetChatHistoryRequest]) (*connect.Response[v1.GetChatHistoryResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("expense.v1.ExpenseService.GetChatHistory is not implemented"))
 }

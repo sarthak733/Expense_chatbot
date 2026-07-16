@@ -331,6 +331,37 @@ message GetMonthlyInsightsResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Chat History Messages
+// ---------------------------------------------------------------------------
+
+message ChatMessage {
+  int32  id           = 1;
+  int32  user_id      = 2;
+  string role         = 3; // "user" or "assistant"
+  string message_text = 4;
+  string created_at   = 5;
+}
+
+message SendChatMessageRequest {
+  string message_text = 1;
+}
+
+message SendChatMessageResponse {
+  ChatMessage user_message = 1;
+  ChatMessage bot_response = 2;
+}
+
+message GetChatHistoryRequest {
+  int32 limit  = 1;
+  int32 offset = 2;
+}
+
+message GetChatHistoryResponse {
+  repeated ChatMessage messages = 1;
+  int32 total_count             = 2;
+}
+
+// ---------------------------------------------------------------------------
 // Service definition
 // ---------------------------------------------------------------------------
 
@@ -369,5 +400,10 @@ service ExpenseService {
 
   // Monthly Comparison Insights
   rpc GetMonthlyInsights (GetMonthlyInsightsRequest) returns (GetMonthlyInsightsResponse);
+
+  // Chat message & history
+  rpc SendChatMessage (SendChatMessageRequest) returns (SendChatMessageResponse);
+  rpc GetChatHistory  (GetChatHistoryRequest)  returns (GetChatHistoryResponse);
 }
+
 

@@ -2806,6 +2806,282 @@ func (x *GetMonthlyInsightsResponse) GetGeneralInsights() []string {
 	return nil
 }
 
+type ChatMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        int32                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"` // "user" or "assistant"
+	MessageText   string                 `protobuf:"bytes,4,opt,name=message_text,json=messageText,proto3" json:"message_text,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatMessage) Reset() {
+	*x = ChatMessage{}
+	mi := &file_expense_v1_expense_proto_msgTypes[48]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatMessage) ProtoMessage() {}
+
+func (x *ChatMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_expense_v1_expense_proto_msgTypes[48]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatMessage.ProtoReflect.Descriptor instead.
+func (*ChatMessage) Descriptor() ([]byte, []int) {
+	return file_expense_v1_expense_proto_rawDescGZIP(), []int{48}
+}
+
+func (x *ChatMessage) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ChatMessage) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *ChatMessage) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *ChatMessage) GetMessageText() string {
+	if x != nil {
+		return x.MessageText
+	}
+	return ""
+}
+
+func (x *ChatMessage) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+type SendChatMessageRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MessageText   string                 `protobuf:"bytes,1,opt,name=message_text,json=messageText,proto3" json:"message_text,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SendChatMessageRequest) Reset() {
+	*x = SendChatMessageRequest{}
+	mi := &file_expense_v1_expense_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SendChatMessageRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendChatMessageRequest) ProtoMessage() {}
+
+func (x *SendChatMessageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_expense_v1_expense_proto_msgTypes[49]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SendChatMessageRequest.ProtoReflect.Descriptor instead.
+func (*SendChatMessageRequest) Descriptor() ([]byte, []int) {
+	return file_expense_v1_expense_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *SendChatMessageRequest) GetMessageText() string {
+	if x != nil {
+		return x.MessageText
+	}
+	return ""
+}
+
+type SendChatMessageResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserMessage   *ChatMessage           `protobuf:"bytes,1,opt,name=user_message,json=userMessage,proto3" json:"user_message,omitempty"`
+	BotResponse   *ChatMessage           `protobuf:"bytes,2,opt,name=bot_response,json=botResponse,proto3" json:"bot_response,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SendChatMessageResponse) Reset() {
+	*x = SendChatMessageResponse{}
+	mi := &file_expense_v1_expense_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SendChatMessageResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendChatMessageResponse) ProtoMessage() {}
+
+func (x *SendChatMessageResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_expense_v1_expense_proto_msgTypes[50]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SendChatMessageResponse.ProtoReflect.Descriptor instead.
+func (*SendChatMessageResponse) Descriptor() ([]byte, []int) {
+	return file_expense_v1_expense_proto_rawDescGZIP(), []int{50}
+}
+
+func (x *SendChatMessageResponse) GetUserMessage() *ChatMessage {
+	if x != nil {
+		return x.UserMessage
+	}
+	return nil
+}
+
+func (x *SendChatMessageResponse) GetBotResponse() *ChatMessage {
+	if x != nil {
+		return x.BotResponse
+	}
+	return nil
+}
+
+type GetChatHistoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset        int32                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetChatHistoryRequest) Reset() {
+	*x = GetChatHistoryRequest{}
+	mi := &file_expense_v1_expense_proto_msgTypes[51]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetChatHistoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetChatHistoryRequest) ProtoMessage() {}
+
+func (x *GetChatHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_expense_v1_expense_proto_msgTypes[51]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetChatHistoryRequest.ProtoReflect.Descriptor instead.
+func (*GetChatHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_expense_v1_expense_proto_rawDescGZIP(), []int{51}
+}
+
+func (x *GetChatHistoryRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *GetChatHistoryRequest) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+type GetChatHistoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Messages      []*ChatMessage         `protobuf:"bytes,1,rep,name=messages,proto3" json:"messages,omitempty"`
+	TotalCount    int32                  `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetChatHistoryResponse) Reset() {
+	*x = GetChatHistoryResponse{}
+	mi := &file_expense_v1_expense_proto_msgTypes[52]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetChatHistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetChatHistoryResponse) ProtoMessage() {}
+
+func (x *GetChatHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_expense_v1_expense_proto_msgTypes[52]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetChatHistoryResponse.ProtoReflect.Descriptor instead.
+func (*GetChatHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_expense_v1_expense_proto_rawDescGZIP(), []int{52}
+}
+
+func (x *GetChatHistoryResponse) GetMessages() []*ChatMessage {
+	if x != nil {
+		return x.Messages
+	}
+	return nil
+}
+
+func (x *GetChatHistoryResponse) GetTotalCount() int32 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
 var File_expense_v1_expense_proto protoreflect.FileDescriptor
 
 const file_expense_v1_expense_proto_rawDesc = "" +
@@ -3020,7 +3296,26 @@ const file_expense_v1_expense_proto_rawDesc = "" +
 	"prev_total\x18\x04 \x01(\x01R\tprevTotal\x122\n" +
 	"\x15total_diff_percentage\x18\x05 \x01(\x01R\x13totalDiffPercentage\x12H\n" +
 	"\x11category_insights\x18\x06 \x03(\v2\x1b.expense.v1.CategoryInsightR\x10categoryInsights\x12)\n" +
-	"\x10general_insights\x18\a \x03(\tR\x0fgeneralInsights2\xfe\x0f\n" +
+	"\x10general_insights\x18\a \x03(\tR\x0fgeneralInsights\"\x8c\x01\n" +
+	"\vChatMessage\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x05R\x06userId\x12\x12\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role\x12!\n" +
+	"\fmessage_text\x18\x04 \x01(\tR\vmessageText\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\tR\tcreatedAt\";\n" +
+	"\x16SendChatMessageRequest\x12!\n" +
+	"\fmessage_text\x18\x01 \x01(\tR\vmessageText\"\x91\x01\n" +
+	"\x17SendChatMessageResponse\x12:\n" +
+	"\fuser_message\x18\x01 \x01(\v2\x17.expense.v1.ChatMessageR\vuserMessage\x12:\n" +
+	"\fbot_response\x18\x02 \x01(\v2\x17.expense.v1.ChatMessageR\vbotResponse\"E\n" +
+	"\x15GetChatHistoryRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x02 \x01(\x05R\x06offset\"n\n" +
+	"\x16GetChatHistoryResponse\x123\n" +
+	"\bmessages\x18\x01 \x03(\v2\x17.expense.v1.ChatMessageR\bmessages\x12\x1f\n" +
+	"\vtotal_count\x18\x02 \x01(\x05R\n" +
+	"totalCount2\xb3\x11\n" +
 	"\x0eExpenseService\x12T\n" +
 	"\rCreateExpense\x12 .expense.v1.CreateExpenseRequest\x1a!.expense.v1.CreateExpenseResponse\x12K\n" +
 	"\n" +
@@ -3044,7 +3339,9 @@ const file_expense_v1_expense_proto_rawDesc = "" +
 	"\x11ExportExpensesPDF\x12!.expense.v1.ExportExpensesRequest\x1a%.expense.v1.ExportExpensesPDFResponse\x12]\n" +
 	"\x10ParseExpenseText\x12#.expense.v1.ParseExpenseTextRequest\x1a$.expense.v1.ParseExpenseTextResponse\x12Z\n" +
 	"\x0fQuickAddExpense\x12\".expense.v1.QuickAddExpenseRequest\x1a#.expense.v1.QuickAddExpenseResponse\x12c\n" +
-	"\x12GetMonthlyInsights\x12%.expense.v1.GetMonthlyInsightsRequest\x1a&.expense.v1.GetMonthlyInsightsResponseB)Z'expense-server/gen/expense/v1;expensev1b\x06proto3"
+	"\x12GetMonthlyInsights\x12%.expense.v1.GetMonthlyInsightsRequest\x1a&.expense.v1.GetMonthlyInsightsResponse\x12Z\n" +
+	"\x0fSendChatMessage\x12\".expense.v1.SendChatMessageRequest\x1a#.expense.v1.SendChatMessageResponse\x12W\n" +
+	"\x0eGetChatHistory\x12!.expense.v1.GetChatHistoryRequest\x1a\".expense.v1.GetChatHistoryResponseB)Z'expense-server/gen/expense/v1;expensev1b\x06proto3"
 
 var (
 	file_expense_v1_expense_proto_rawDescOnce sync.Once
@@ -3058,7 +3355,7 @@ func file_expense_v1_expense_proto_rawDescGZIP() []byte {
 	return file_expense_v1_expense_proto_rawDescData
 }
 
-var file_expense_v1_expense_proto_msgTypes = make([]protoimpl.MessageInfo, 48)
+var file_expense_v1_expense_proto_msgTypes = make([]protoimpl.MessageInfo, 53)
 var file_expense_v1_expense_proto_goTypes = []any{
 	(*Expense)(nil),                        // 0: expense.v1.Expense
 	(*CreateExpenseRequest)(nil),           // 1: expense.v1.CreateExpenseRequest
@@ -3108,6 +3405,11 @@ var file_expense_v1_expense_proto_goTypes = []any{
 	(*CategoryInsight)(nil),                // 45: expense.v1.CategoryInsight
 	(*GetMonthlyInsightsRequest)(nil),      // 46: expense.v1.GetMonthlyInsightsRequest
 	(*GetMonthlyInsightsResponse)(nil),     // 47: expense.v1.GetMonthlyInsightsResponse
+	(*ChatMessage)(nil),                    // 48: expense.v1.ChatMessage
+	(*SendChatMessageRequest)(nil),         // 49: expense.v1.SendChatMessageRequest
+	(*SendChatMessageResponse)(nil),        // 50: expense.v1.SendChatMessageResponse
+	(*GetChatHistoryRequest)(nil),          // 51: expense.v1.GetChatHistoryRequest
+	(*GetChatHistoryResponse)(nil),         // 52: expense.v1.GetChatHistoryResponse
 }
 var file_expense_v1_expense_proto_depIdxs = []int32{
 	0,  // 0: expense.v1.CreateExpenseResponse.expense:type_name -> expense.v1.Expense
@@ -3125,55 +3427,62 @@ var file_expense_v1_expense_proto_depIdxs = []int32{
 	29, // 12: expense.v1.UpdateRecurringExpenseResponse.recurring_expense:type_name -> expense.v1.RecurringExpense
 	0,  // 13: expense.v1.QuickAddExpenseResponse.expense:type_name -> expense.v1.Expense
 	45, // 14: expense.v1.GetMonthlyInsightsResponse.category_insights:type_name -> expense.v1.CategoryInsight
-	1,  // 15: expense.v1.ExpenseService.CreateExpense:input_type -> expense.v1.CreateExpenseRequest
-	3,  // 16: expense.v1.ExpenseService.GetExpense:input_type -> expense.v1.GetExpenseRequest
-	5,  // 17: expense.v1.ExpenseService.ListExpenses:input_type -> expense.v1.ListExpensesRequest
-	7,  // 18: expense.v1.ExpenseService.UpdateExpense:input_type -> expense.v1.UpdateExpenseRequest
-	9,  // 19: expense.v1.ExpenseService.DeleteExpense:input_type -> expense.v1.DeleteExpenseRequest
-	12, // 20: expense.v1.ExpenseService.CreateCategory:input_type -> expense.v1.CreateCategoryRequest
-	14, // 21: expense.v1.ExpenseService.ListCategories:input_type -> expense.v1.ListCategoriesRequest
-	16, // 22: expense.v1.ExpenseService.UpdateCategory:input_type -> expense.v1.UpdateCategoryRequest
-	18, // 23: expense.v1.ExpenseService.DeleteCategory:input_type -> expense.v1.DeleteCategoryRequest
-	21, // 24: expense.v1.ExpenseService.CreateBudget:input_type -> expense.v1.CreateBudgetRequest
-	23, // 25: expense.v1.ExpenseService.ListBudgets:input_type -> expense.v1.ListBudgetsRequest
-	25, // 26: expense.v1.ExpenseService.UpdateBudget:input_type -> expense.v1.UpdateBudgetRequest
-	27, // 27: expense.v1.ExpenseService.DeleteBudget:input_type -> expense.v1.DeleteBudgetRequest
-	30, // 28: expense.v1.ExpenseService.CreateRecurringExpense:input_type -> expense.v1.CreateRecurringExpenseRequest
-	32, // 29: expense.v1.ExpenseService.ListRecurringExpenses:input_type -> expense.v1.ListRecurringExpensesRequest
-	34, // 30: expense.v1.ExpenseService.UpdateRecurringExpense:input_type -> expense.v1.UpdateRecurringExpenseRequest
-	36, // 31: expense.v1.ExpenseService.DeleteRecurringExpense:input_type -> expense.v1.DeleteRecurringExpenseRequest
-	38, // 32: expense.v1.ExpenseService.ExportExpensesCSV:input_type -> expense.v1.ExportExpensesRequest
-	38, // 33: expense.v1.ExpenseService.ExportExpensesPDF:input_type -> expense.v1.ExportExpensesRequest
-	41, // 34: expense.v1.ExpenseService.ParseExpenseText:input_type -> expense.v1.ParseExpenseTextRequest
-	43, // 35: expense.v1.ExpenseService.QuickAddExpense:input_type -> expense.v1.QuickAddExpenseRequest
-	46, // 36: expense.v1.ExpenseService.GetMonthlyInsights:input_type -> expense.v1.GetMonthlyInsightsRequest
-	2,  // 37: expense.v1.ExpenseService.CreateExpense:output_type -> expense.v1.CreateExpenseResponse
-	4,  // 38: expense.v1.ExpenseService.GetExpense:output_type -> expense.v1.GetExpenseResponse
-	6,  // 39: expense.v1.ExpenseService.ListExpenses:output_type -> expense.v1.ListExpensesResponse
-	8,  // 40: expense.v1.ExpenseService.UpdateExpense:output_type -> expense.v1.UpdateExpenseResponse
-	10, // 41: expense.v1.ExpenseService.DeleteExpense:output_type -> expense.v1.DeleteExpenseResponse
-	13, // 42: expense.v1.ExpenseService.CreateCategory:output_type -> expense.v1.CreateCategoryResponse
-	15, // 43: expense.v1.ExpenseService.ListCategories:output_type -> expense.v1.ListCategoriesResponse
-	17, // 44: expense.v1.ExpenseService.UpdateCategory:output_type -> expense.v1.UpdateCategoryResponse
-	19, // 45: expense.v1.ExpenseService.DeleteCategory:output_type -> expense.v1.DeleteCategoryResponse
-	22, // 46: expense.v1.ExpenseService.CreateBudget:output_type -> expense.v1.CreateBudgetResponse
-	24, // 47: expense.v1.ExpenseService.ListBudgets:output_type -> expense.v1.ListBudgetsResponse
-	26, // 48: expense.v1.ExpenseService.UpdateBudget:output_type -> expense.v1.UpdateBudgetResponse
-	28, // 49: expense.v1.ExpenseService.DeleteBudget:output_type -> expense.v1.DeleteBudgetResponse
-	31, // 50: expense.v1.ExpenseService.CreateRecurringExpense:output_type -> expense.v1.CreateRecurringExpenseResponse
-	33, // 51: expense.v1.ExpenseService.ListRecurringExpenses:output_type -> expense.v1.ListRecurringExpensesResponse
-	35, // 52: expense.v1.ExpenseService.UpdateRecurringExpense:output_type -> expense.v1.UpdateRecurringExpenseResponse
-	37, // 53: expense.v1.ExpenseService.DeleteRecurringExpense:output_type -> expense.v1.DeleteRecurringExpenseResponse
-	39, // 54: expense.v1.ExpenseService.ExportExpensesCSV:output_type -> expense.v1.ExportExpensesCSVResponse
-	40, // 55: expense.v1.ExpenseService.ExportExpensesPDF:output_type -> expense.v1.ExportExpensesPDFResponse
-	42, // 56: expense.v1.ExpenseService.ParseExpenseText:output_type -> expense.v1.ParseExpenseTextResponse
-	44, // 57: expense.v1.ExpenseService.QuickAddExpense:output_type -> expense.v1.QuickAddExpenseResponse
-	47, // 58: expense.v1.ExpenseService.GetMonthlyInsights:output_type -> expense.v1.GetMonthlyInsightsResponse
-	37, // [37:59] is the sub-list for method output_type
-	15, // [15:37] is the sub-list for method input_type
-	15, // [15:15] is the sub-list for extension type_name
-	15, // [15:15] is the sub-list for extension extendee
-	0,  // [0:15] is the sub-list for field type_name
+	48, // 15: expense.v1.SendChatMessageResponse.user_message:type_name -> expense.v1.ChatMessage
+	48, // 16: expense.v1.SendChatMessageResponse.bot_response:type_name -> expense.v1.ChatMessage
+	48, // 17: expense.v1.GetChatHistoryResponse.messages:type_name -> expense.v1.ChatMessage
+	1,  // 18: expense.v1.ExpenseService.CreateExpense:input_type -> expense.v1.CreateExpenseRequest
+	3,  // 19: expense.v1.ExpenseService.GetExpense:input_type -> expense.v1.GetExpenseRequest
+	5,  // 20: expense.v1.ExpenseService.ListExpenses:input_type -> expense.v1.ListExpensesRequest
+	7,  // 21: expense.v1.ExpenseService.UpdateExpense:input_type -> expense.v1.UpdateExpenseRequest
+	9,  // 22: expense.v1.ExpenseService.DeleteExpense:input_type -> expense.v1.DeleteExpenseRequest
+	12, // 23: expense.v1.ExpenseService.CreateCategory:input_type -> expense.v1.CreateCategoryRequest
+	14, // 24: expense.v1.ExpenseService.ListCategories:input_type -> expense.v1.ListCategoriesRequest
+	16, // 25: expense.v1.ExpenseService.UpdateCategory:input_type -> expense.v1.UpdateCategoryRequest
+	18, // 26: expense.v1.ExpenseService.DeleteCategory:input_type -> expense.v1.DeleteCategoryRequest
+	21, // 27: expense.v1.ExpenseService.CreateBudget:input_type -> expense.v1.CreateBudgetRequest
+	23, // 28: expense.v1.ExpenseService.ListBudgets:input_type -> expense.v1.ListBudgetsRequest
+	25, // 29: expense.v1.ExpenseService.UpdateBudget:input_type -> expense.v1.UpdateBudgetRequest
+	27, // 30: expense.v1.ExpenseService.DeleteBudget:input_type -> expense.v1.DeleteBudgetRequest
+	30, // 31: expense.v1.ExpenseService.CreateRecurringExpense:input_type -> expense.v1.CreateRecurringExpenseRequest
+	32, // 32: expense.v1.ExpenseService.ListRecurringExpenses:input_type -> expense.v1.ListRecurringExpensesRequest
+	34, // 33: expense.v1.ExpenseService.UpdateRecurringExpense:input_type -> expense.v1.UpdateRecurringExpenseRequest
+	36, // 34: expense.v1.ExpenseService.DeleteRecurringExpense:input_type -> expense.v1.DeleteRecurringExpenseRequest
+	38, // 35: expense.v1.ExpenseService.ExportExpensesCSV:input_type -> expense.v1.ExportExpensesRequest
+	38, // 36: expense.v1.ExpenseService.ExportExpensesPDF:input_type -> expense.v1.ExportExpensesRequest
+	41, // 37: expense.v1.ExpenseService.ParseExpenseText:input_type -> expense.v1.ParseExpenseTextRequest
+	43, // 38: expense.v1.ExpenseService.QuickAddExpense:input_type -> expense.v1.QuickAddExpenseRequest
+	46, // 39: expense.v1.ExpenseService.GetMonthlyInsights:input_type -> expense.v1.GetMonthlyInsightsRequest
+	49, // 40: expense.v1.ExpenseService.SendChatMessage:input_type -> expense.v1.SendChatMessageRequest
+	51, // 41: expense.v1.ExpenseService.GetChatHistory:input_type -> expense.v1.GetChatHistoryRequest
+	2,  // 42: expense.v1.ExpenseService.CreateExpense:output_type -> expense.v1.CreateExpenseResponse
+	4,  // 43: expense.v1.ExpenseService.GetExpense:output_type -> expense.v1.GetExpenseResponse
+	6,  // 44: expense.v1.ExpenseService.ListExpenses:output_type -> expense.v1.ListExpensesResponse
+	8,  // 45: expense.v1.ExpenseService.UpdateExpense:output_type -> expense.v1.UpdateExpenseResponse
+	10, // 46: expense.v1.ExpenseService.DeleteExpense:output_type -> expense.v1.DeleteExpenseResponse
+	13, // 47: expense.v1.ExpenseService.CreateCategory:output_type -> expense.v1.CreateCategoryResponse
+	15, // 48: expense.v1.ExpenseService.ListCategories:output_type -> expense.v1.ListCategoriesResponse
+	17, // 49: expense.v1.ExpenseService.UpdateCategory:output_type -> expense.v1.UpdateCategoryResponse
+	19, // 50: expense.v1.ExpenseService.DeleteCategory:output_type -> expense.v1.DeleteCategoryResponse
+	22, // 51: expense.v1.ExpenseService.CreateBudget:output_type -> expense.v1.CreateBudgetResponse
+	24, // 52: expense.v1.ExpenseService.ListBudgets:output_type -> expense.v1.ListBudgetsResponse
+	26, // 53: expense.v1.ExpenseService.UpdateBudget:output_type -> expense.v1.UpdateBudgetResponse
+	28, // 54: expense.v1.ExpenseService.DeleteBudget:output_type -> expense.v1.DeleteBudgetResponse
+	31, // 55: expense.v1.ExpenseService.CreateRecurringExpense:output_type -> expense.v1.CreateRecurringExpenseResponse
+	33, // 56: expense.v1.ExpenseService.ListRecurringExpenses:output_type -> expense.v1.ListRecurringExpensesResponse
+	35, // 57: expense.v1.ExpenseService.UpdateRecurringExpense:output_type -> expense.v1.UpdateRecurringExpenseResponse
+	37, // 58: expense.v1.ExpenseService.DeleteRecurringExpense:output_type -> expense.v1.DeleteRecurringExpenseResponse
+	39, // 59: expense.v1.ExpenseService.ExportExpensesCSV:output_type -> expense.v1.ExportExpensesCSVResponse
+	40, // 60: expense.v1.ExpenseService.ExportExpensesPDF:output_type -> expense.v1.ExportExpensesPDFResponse
+	42, // 61: expense.v1.ExpenseService.ParseExpenseText:output_type -> expense.v1.ParseExpenseTextResponse
+	44, // 62: expense.v1.ExpenseService.QuickAddExpense:output_type -> expense.v1.QuickAddExpenseResponse
+	47, // 63: expense.v1.ExpenseService.GetMonthlyInsights:output_type -> expense.v1.GetMonthlyInsightsResponse
+	50, // 64: expense.v1.ExpenseService.SendChatMessage:output_type -> expense.v1.SendChatMessageResponse
+	52, // 65: expense.v1.ExpenseService.GetChatHistory:output_type -> expense.v1.GetChatHistoryResponse
+	42, // [42:66] is the sub-list for method output_type
+	18, // [18:42] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_expense_v1_expense_proto_init() }
@@ -3187,7 +3496,7 @@ func file_expense_v1_expense_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_expense_v1_expense_proto_rawDesc), len(file_expense_v1_expense_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   48,
+			NumMessages:   53,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

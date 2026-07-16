@@ -8,6 +8,7 @@ import (
 
 	"connectrpc.com/connect"
 
+	"expense-server/ent"
 	expensev1 "expense-server/gen/expense/v1"
 	"expense-server/internal/response"
 )
@@ -16,12 +17,16 @@ import (
 // It satisfies both the generated ExpenseServiceHandler and HealthServiceHandler
 // interfaces — keeping the setup in main.go simple (one New() call).
 type Handler struct {
-	DB *sql.DB
+	DB        *sql.DB
+	EntClient *ent.Client
 }
 
-// New returns a Handler with the database connection pool injected.
-func New(db *sql.DB) *Handler {
-	return &Handler{DB: db}
+// New returns a Handler with the database connection pool and Ent Client injected.
+func New(db *sql.DB, entClient *ent.Client) *Handler {
+	return &Handler{
+		DB:        db,
+		EntClient: entClient,
+	}
 }
 
 // ---------------------------------------------------------------------------
