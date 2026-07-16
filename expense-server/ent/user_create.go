@@ -38,6 +38,118 @@ func (uc *UserCreate) SetPasswordHash(s string) *UserCreate {
 	return uc
 }
 
+// SetEmail sets the "email" field.
+func (uc *UserCreate) SetEmail(s string) *UserCreate {
+	uc.mutation.SetEmail(s)
+	return uc
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (uc *UserCreate) SetNillableEmail(s *string) *UserCreate {
+	if s != nil {
+		uc.SetEmail(*s)
+	}
+	return uc
+}
+
+// SetFirstName sets the "first_name" field.
+func (uc *UserCreate) SetFirstName(s string) *UserCreate {
+	uc.mutation.SetFirstName(s)
+	return uc
+}
+
+// SetNillableFirstName sets the "first_name" field if the given value is not nil.
+func (uc *UserCreate) SetNillableFirstName(s *string) *UserCreate {
+	if s != nil {
+		uc.SetFirstName(*s)
+	}
+	return uc
+}
+
+// SetLastName sets the "last_name" field.
+func (uc *UserCreate) SetLastName(s string) *UserCreate {
+	uc.mutation.SetLastName(s)
+	return uc
+}
+
+// SetNillableLastName sets the "last_name" field if the given value is not nil.
+func (uc *UserCreate) SetNillableLastName(s *string) *UserCreate {
+	if s != nil {
+		uc.SetLastName(*s)
+	}
+	return uc
+}
+
+// SetCurrency sets the "currency" field.
+func (uc *UserCreate) SetCurrency(s string) *UserCreate {
+	uc.mutation.SetCurrency(s)
+	return uc
+}
+
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (uc *UserCreate) SetNillableCurrency(s *string) *UserCreate {
+	if s != nil {
+		uc.SetCurrency(*s)
+	}
+	return uc
+}
+
+// SetTheme sets the "theme" field.
+func (uc *UserCreate) SetTheme(s string) *UserCreate {
+	uc.mutation.SetTheme(s)
+	return uc
+}
+
+// SetNillableTheme sets the "theme" field if the given value is not nil.
+func (uc *UserCreate) SetNillableTheme(s *string) *UserCreate {
+	if s != nil {
+		uc.SetTheme(*s)
+	}
+	return uc
+}
+
+// SetWeeklyStart sets the "weekly_start" field.
+func (uc *UserCreate) SetWeeklyStart(s string) *UserCreate {
+	uc.mutation.SetWeeklyStart(s)
+	return uc
+}
+
+// SetNillableWeeklyStart sets the "weekly_start" field if the given value is not nil.
+func (uc *UserCreate) SetNillableWeeklyStart(s *string) *UserCreate {
+	if s != nil {
+		uc.SetWeeklyStart(*s)
+	}
+	return uc
+}
+
+// SetMonthlyStartDay sets the "monthly_start_day" field.
+func (uc *UserCreate) SetMonthlyStartDay(i int) *UserCreate {
+	uc.mutation.SetMonthlyStartDay(i)
+	return uc
+}
+
+// SetNillableMonthlyStartDay sets the "monthly_start_day" field if the given value is not nil.
+func (uc *UserCreate) SetNillableMonthlyStartDay(i *int) *UserCreate {
+	if i != nil {
+		uc.SetMonthlyStartDay(*i)
+	}
+	return uc
+}
+
+// SetBudgetAlertThreshold sets the "budget_alert_threshold" field.
+func (uc *UserCreate) SetBudgetAlertThreshold(f float64) *UserCreate {
+	uc.mutation.SetBudgetAlertThreshold(f)
+	return uc
+}
+
+// SetNillableBudgetAlertThreshold sets the "budget_alert_threshold" field if the given value is not nil.
+func (uc *UserCreate) SetNillableBudgetAlertThreshold(f *float64) *UserCreate {
+	if f != nil {
+		uc.SetBudgetAlertThreshold(*f)
+	}
+	return uc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetCreatedAt(t)
@@ -183,6 +295,26 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UserCreate) defaults() {
+	if _, ok := uc.mutation.Currency(); !ok {
+		v := user.DefaultCurrency
+		uc.mutation.SetCurrency(v)
+	}
+	if _, ok := uc.mutation.Theme(); !ok {
+		v := user.DefaultTheme
+		uc.mutation.SetTheme(v)
+	}
+	if _, ok := uc.mutation.WeeklyStart(); !ok {
+		v := user.DefaultWeeklyStart
+		uc.mutation.SetWeeklyStart(v)
+	}
+	if _, ok := uc.mutation.MonthlyStartDay(); !ok {
+		v := user.DefaultMonthlyStartDay
+		uc.mutation.SetMonthlyStartDay(v)
+	}
+	if _, ok := uc.mutation.BudgetAlertThreshold(); !ok {
+		v := user.DefaultBudgetAlertThreshold
+		uc.mutation.SetBudgetAlertThreshold(v)
+	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		v := user.DefaultCreatedAt()
 		uc.mutation.SetCreatedAt(v)
@@ -206,6 +338,21 @@ func (uc *UserCreate) check() error {
 		if err := user.PasswordHashValidator(v); err != nil {
 			return &ValidationError{Name: "password_hash", err: fmt.Errorf(`ent: validator failed for field "User.password_hash": %w`, err)}
 		}
+	}
+	if _, ok := uc.mutation.Currency(); !ok {
+		return &ValidationError{Name: "currency", err: errors.New(`ent: missing required field "User.currency"`)}
+	}
+	if _, ok := uc.mutation.Theme(); !ok {
+		return &ValidationError{Name: "theme", err: errors.New(`ent: missing required field "User.theme"`)}
+	}
+	if _, ok := uc.mutation.WeeklyStart(); !ok {
+		return &ValidationError{Name: "weekly_start", err: errors.New(`ent: missing required field "User.weekly_start"`)}
+	}
+	if _, ok := uc.mutation.MonthlyStartDay(); !ok {
+		return &ValidationError{Name: "monthly_start_day", err: errors.New(`ent: missing required field "User.monthly_start_day"`)}
+	}
+	if _, ok := uc.mutation.BudgetAlertThreshold(); !ok {
+		return &ValidationError{Name: "budget_alert_threshold", err: errors.New(`ent: missing required field "User.budget_alert_threshold"`)}
 	}
 	return nil
 }
@@ -246,6 +393,38 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.PasswordHash(); ok {
 		_spec.SetField(user.FieldPasswordHash, field.TypeString, value)
 		_node.PasswordHash = value
+	}
+	if value, ok := uc.mutation.Email(); ok {
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
+		_node.Email = &value
+	}
+	if value, ok := uc.mutation.FirstName(); ok {
+		_spec.SetField(user.FieldFirstName, field.TypeString, value)
+		_node.FirstName = &value
+	}
+	if value, ok := uc.mutation.LastName(); ok {
+		_spec.SetField(user.FieldLastName, field.TypeString, value)
+		_node.LastName = &value
+	}
+	if value, ok := uc.mutation.Currency(); ok {
+		_spec.SetField(user.FieldCurrency, field.TypeString, value)
+		_node.Currency = value
+	}
+	if value, ok := uc.mutation.Theme(); ok {
+		_spec.SetField(user.FieldTheme, field.TypeString, value)
+		_node.Theme = value
+	}
+	if value, ok := uc.mutation.WeeklyStart(); ok {
+		_spec.SetField(user.FieldWeeklyStart, field.TypeString, value)
+		_node.WeeklyStart = value
+	}
+	if value, ok := uc.mutation.MonthlyStartDay(); ok {
+		_spec.SetField(user.FieldMonthlyStartDay, field.TypeInt, value)
+		_node.MonthlyStartDay = value
+	}
+	if value, ok := uc.mutation.BudgetAlertThreshold(); ok {
+		_spec.SetField(user.FieldBudgetAlertThreshold, field.TypeFloat64, value)
+		_node.BudgetAlertThreshold = value
 	}
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)

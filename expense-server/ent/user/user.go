@@ -18,6 +18,22 @@ const (
 	FieldUsername = "username"
 	// FieldPasswordHash holds the string denoting the password_hash field in the database.
 	FieldPasswordHash = "password_hash"
+	// FieldEmail holds the string denoting the email field in the database.
+	FieldEmail = "email"
+	// FieldFirstName holds the string denoting the first_name field in the database.
+	FieldFirstName = "first_name"
+	// FieldLastName holds the string denoting the last_name field in the database.
+	FieldLastName = "last_name"
+	// FieldCurrency holds the string denoting the currency field in the database.
+	FieldCurrency = "currency"
+	// FieldTheme holds the string denoting the theme field in the database.
+	FieldTheme = "theme"
+	// FieldWeeklyStart holds the string denoting the weekly_start field in the database.
+	FieldWeeklyStart = "weekly_start"
+	// FieldMonthlyStartDay holds the string denoting the monthly_start_day field in the database.
+	FieldMonthlyStartDay = "monthly_start_day"
+	// FieldBudgetAlertThreshold holds the string denoting the budget_alert_threshold field in the database.
+	FieldBudgetAlertThreshold = "budget_alert_threshold"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// EdgeSessions holds the string denoting the sessions edge name in mutations.
@@ -83,6 +99,14 @@ var Columns = []string{
 	FieldID,
 	FieldUsername,
 	FieldPasswordHash,
+	FieldEmail,
+	FieldFirstName,
+	FieldLastName,
+	FieldCurrency,
+	FieldTheme,
+	FieldWeeklyStart,
+	FieldMonthlyStartDay,
+	FieldBudgetAlertThreshold,
 	FieldCreatedAt,
 }
 
@@ -101,6 +125,16 @@ var (
 	UsernameValidator func(string) error
 	// PasswordHashValidator is a validator for the "password_hash" field. It is called by the builders before save.
 	PasswordHashValidator func(string) error
+	// DefaultCurrency holds the default value on creation for the "currency" field.
+	DefaultCurrency string
+	// DefaultTheme holds the default value on creation for the "theme" field.
+	DefaultTheme string
+	// DefaultWeeklyStart holds the default value on creation for the "weekly_start" field.
+	DefaultWeeklyStart string
+	// DefaultMonthlyStartDay holds the default value on creation for the "monthly_start_day" field.
+	DefaultMonthlyStartDay int
+	// DefaultBudgetAlertThreshold holds the default value on creation for the "budget_alert_threshold" field.
+	DefaultBudgetAlertThreshold float64
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 )
@@ -121,6 +155,46 @@ func ByUsername(opts ...sql.OrderTermOption) OrderOption {
 // ByPasswordHash orders the results by the password_hash field.
 func ByPasswordHash(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPasswordHash, opts...).ToFunc()
+}
+
+// ByEmail orders the results by the email field.
+func ByEmail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmail, opts...).ToFunc()
+}
+
+// ByFirstName orders the results by the first_name field.
+func ByFirstName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFirstName, opts...).ToFunc()
+}
+
+// ByLastName orders the results by the last_name field.
+func ByLastName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastName, opts...).ToFunc()
+}
+
+// ByCurrency orders the results by the currency field.
+func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCurrency, opts...).ToFunc()
+}
+
+// ByTheme orders the results by the theme field.
+func ByTheme(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTheme, opts...).ToFunc()
+}
+
+// ByWeeklyStart orders the results by the weekly_start field.
+func ByWeeklyStart(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWeeklyStart, opts...).ToFunc()
+}
+
+// ByMonthlyStartDay orders the results by the monthly_start_day field.
+func ByMonthlyStartDay(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMonthlyStartDay, opts...).ToFunc()
+}
+
+// ByBudgetAlertThreshold orders the results by the budget_alert_threshold field.
+func ByBudgetAlertThreshold(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBudgetAlertThreshold, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

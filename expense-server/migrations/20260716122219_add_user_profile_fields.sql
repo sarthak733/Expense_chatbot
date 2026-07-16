@@ -1,0 +1,2 @@
+-- Modify "users" table
+ALTER TABLE "users" ADD COLUMN "email" character varying NULL, ADD COLUMN "first_name" character varying NULL, ADD COLUMN "last_name" character varying NULL, ADD COLUMN "currency" character varying NOT NULL DEFAULT 'USD', ADD COLUMN "theme" character varying NOT NULL DEFAULT 'system', ADD COLUMN "weekly_start" character varying NOT NULL DEFAULT 'monday', ADD COLUMN "monthly_start_day" bigint NOT NULL DEFAULT 1, ADD COLUMN "budget_alert_threshold" double precision NOT NULL DEFAULT 80;

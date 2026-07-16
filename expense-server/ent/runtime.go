@@ -81,8 +81,28 @@ func init() {
 	userDescPasswordHash := userFields[2].Descriptor()
 	// user.PasswordHashValidator is a validator for the "password_hash" field. It is called by the builders before save.
 	user.PasswordHashValidator = userDescPasswordHash.Validators[0].(func(string) error)
+	// userDescCurrency is the schema descriptor for currency field.
+	userDescCurrency := userFields[6].Descriptor()
+	// user.DefaultCurrency holds the default value on creation for the currency field.
+	user.DefaultCurrency = userDescCurrency.Default.(string)
+	// userDescTheme is the schema descriptor for theme field.
+	userDescTheme := userFields[7].Descriptor()
+	// user.DefaultTheme holds the default value on creation for the theme field.
+	user.DefaultTheme = userDescTheme.Default.(string)
+	// userDescWeeklyStart is the schema descriptor for weekly_start field.
+	userDescWeeklyStart := userFields[8].Descriptor()
+	// user.DefaultWeeklyStart holds the default value on creation for the weekly_start field.
+	user.DefaultWeeklyStart = userDescWeeklyStart.Default.(string)
+	// userDescMonthlyStartDay is the schema descriptor for monthly_start_day field.
+	userDescMonthlyStartDay := userFields[9].Descriptor()
+	// user.DefaultMonthlyStartDay holds the default value on creation for the monthly_start_day field.
+	user.DefaultMonthlyStartDay = userDescMonthlyStartDay.Default.(int)
+	// userDescBudgetAlertThreshold is the schema descriptor for budget_alert_threshold field.
+	userDescBudgetAlertThreshold := userFields[10].Descriptor()
+	// user.DefaultBudgetAlertThreshold holds the default value on creation for the budget_alert_threshold field.
+	user.DefaultBudgetAlertThreshold = userDescBudgetAlertThreshold.Default.(float64)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[3].Descriptor()
+	userDescCreatedAt := userFields[11].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 }

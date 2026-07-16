@@ -88,6 +88,13 @@ func setupTestServer(t *testing.T) (*httptest.Server, *sql.DB, *ent.Client) {
 	)
 	mux.Handle(expensePath, expenseHandler)
 
+	// Register user service
+	userPath, userHandler := expensev1connect.NewUserServiceHandler(
+		h,
+		connect.WithInterceptors(authInterceptor),
+	)
+	mux.Handle(userPath, userHandler)
+
 	server := httptest.NewServer(mux)
 	return server, db, entClient
 }
@@ -265,4 +272,195 @@ func TestExpenseFlow(t *testing.T) {
 	if expenseField["title"] != "Weekly Groceries" {
 		t.Errorf("expected expense title 'Weekly Groceries', got %v", expenseField["title"])
 	}
+}
+
+func TestUserProfileFlow(t *testing.T) {
+	server, db, entClient := setupTestServer(t)
+	defer server.Close()
+	defer entClient.Close()
+	defer db.Close()
+
+	// Register user to get JWT token
+	registerPayload, _ := json.Marshal(map[string]string{
+		"username": "profiletester",
+		"password": "password123",
+	})
+	resp, _ := http.Post(
+		fmt.Sprintf("%s/expense.v1.AuthService/Register", server.URL),
+		"application/json",
+		bytes.NewBuffer(registerPayload),
+	)
+	var registerRes map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&registerRes)
+	resp.Body.Close()
+	token := registerRes["token"].(string)
+
+	client := &http.Client{}
+
+	// 1. Get Profile (Default settings check)
+	req, _ := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s/expense.v1.UserService/GetProfile", server.URL),
+		bytes.NewBuffer([]byte("{}")),
+	)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	respGet, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("get profile request failed: %v", err)
+	}
+	defer respGet.Body.Close()
+
+	if respGet.StatusCode != http.StatusOK {
+		t.Fatalf("expected get profile status 200, got %d", respGet.StatusCode)
+	}
+
+	var getRes map[string]interface{}
+	json.NewDecoder(respGet.Body).Decode(&getRes)
+	profile := getRes["profile"].(map[string]interface{})
+
+	if profile["currency"] != "USD" {
+		t.Errorf("expected default currency USD, got %v", profile["currency"])
+	}
+	if profile["theme"] != "system" {
+		t.Errorf("expected default theme system, got %v", profile["theme"])
+	}
+	if profile["weeklyStart"] != "monday" {
+		t.Errorf("expected default weeklyStart monday, got %v", profile["weeklyStart"])
+	}
+
+	// 2. Update Profile Settings (using camelCase for protobuf fields)
+	updatePayload, _ := json.Marshal(map[string]interface{}{
+		"email":                "jane@test.com",
+		"firstName":            "Jane",
+		"lastName":             "Doe",
+		"currency":             "EUR",
+		"theme":                "dark",
+		"weeklyStart":          "sunday",
+		"monthlyStartDay":      5,
+		"budgetAlertThreshold": 95.0,
+	})
+	req2, _ := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s/expense.v1.UserService/UpdateProfile", server.URL),
+		bytes.NewBuffer(updatePayload),
+	)
+	req2.Header.Set("Content-Type", "application/json")
+	req2.Header.Set("Authorization", "Bearer "+token)
+
+	respUpdate, err := client.Do(req2)
+	if err != nil {
+		t.Fatalf("update profile request failed: %v", err)
+	}
+	defer respUpdate.Body.Close()
+
+	if respUpdate.StatusCode != http.StatusOK {
+		t.Fatalf("expected update profile status 200, got %d", respUpdate.StatusCode)
+	}
+
+	var updateRes map[string]interface{}
+	json.NewDecoder(respUpdate.Body).Decode(&updateRes)
+	profile2 := updateRes["profile"].(map[string]interface{})
+
+	if profile2["email"] != "jane@test.com" || profile2["firstName"] != "Jane" || profile2["lastName"] != "Doe" {
+		t.Errorf("profile name/email fields did not update correctly: got email=%v, firstName=%v, lastName=%v", profile2["email"], profile2["firstName"], profile2["lastName"])
+	}
+	if profile2["currency"] != "EUR" {
+		t.Errorf("expected updated currency EUR, got %v", profile2["currency"])
+	}
+	if profile2["theme"] != "dark" {
+		t.Errorf("expected updated theme dark, got %v", profile2["theme"])
+	}
+	if int(profile2["monthlyStartDay"].(float64)) != 5 {
+		t.Errorf("expected updated monthlyStartDay 5, got %v", profile2["monthlyStartDay"])
+	}
+
+	// 3. Update Password
+	pwPayload, _ := json.Marshal(map[string]string{
+		"old_password": "password123",
+		"new_password": "newpassword456",
+	})
+	req3, _ := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s/expense.v1.UserService/UpdatePassword", server.URL),
+		bytes.NewBuffer(pwPayload),
+	)
+	req3.Header.Set("Content-Type", "application/json")
+	req3.Header.Set("Authorization", "Bearer "+token)
+
+	respPW, err := client.Do(req3)
+	if err != nil {
+		t.Fatalf("update password request failed: %v", err)
+	}
+	defer respPW.Body.Close()
+
+	if respPW.StatusCode != http.StatusOK {
+		t.Fatalf("expected update password status 200, got %d", respPW.StatusCode)
+	}
+
+	// 4. Verify login with old password fails, and new password succeeds
+	// Test Login with OLD password (should fail)
+	loginFailPayload, _ := json.Marshal(map[string]string{
+		"username": "profiletester",
+		"password": "password123",
+	})
+	respLoginFail, _ := http.Post(
+		fmt.Sprintf("%s/expense.v1.AuthService/Login", server.URL),
+		"application/json",
+		bytes.NewBuffer(loginFailPayload),
+	)
+	if respLoginFail.StatusCode == http.StatusOK {
+		t.Errorf("expected login with old password to fail, but it succeeded")
+	}
+	respLoginFail.Body.Close()
+
+	// Test Login with NEW password (should succeed)
+	loginSuccessPayload, _ := json.Marshal(map[string]string{
+		"username": "profiletester",
+		"password": "newpassword456",
+	})
+	respLoginSuccess, _ := http.Post(
+		fmt.Sprintf("%s/expense.v1.AuthService/Login", server.URL),
+		"application/json",
+		bytes.NewBuffer(loginSuccessPayload),
+	)
+	if respLoginSuccess.StatusCode != http.StatusOK {
+		t.Errorf("expected login with new password to succeed, got %d", respLoginSuccess.StatusCode)
+	}
+	respLoginSuccess.Body.Close()
+
+	// 5. Delete Profile
+	req4, _ := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s/expense.v1.UserService/DeleteProfile", server.URL),
+		bytes.NewBuffer([]byte("{}")),
+	)
+	req4.Header.Set("Content-Type", "application/json")
+	req4.Header.Set("Authorization", "Bearer "+token)
+
+	respDelete, err := client.Do(req4)
+	if err != nil {
+		t.Fatalf("delete profile request failed: %v", err)
+	}
+	defer respDelete.Body.Close()
+
+	if respDelete.StatusCode != http.StatusOK {
+		t.Fatalf("expected delete profile status 200, got %d", respDelete.StatusCode)
+	}
+
+	// 6. Verify profile is gone (should get unauthenticated because session is cascading deleted)
+	req5, _ := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s/expense.v1.UserService/GetProfile", server.URL),
+		bytes.NewBuffer([]byte("{}")),
+	)
+	req5.Header.Set("Content-Type", "application/json")
+	req5.Header.Set("Authorization", "Bearer "+token)
+
+	respGetGone, _ := client.Do(req5)
+	if respGetGone.StatusCode == http.StatusOK {
+		t.Errorf("expected get profile to fail after delete, but got 200")
+	}
+	respGetGone.Body.Close()
 }

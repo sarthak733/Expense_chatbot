@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package expense.v1;
+
+option go_package = "expense-server/gen/expense/v1;expensev1";
+
+message UserProfile {
+  int32  id                     = 1;
+  string username               = 2;
+  string email                  = 3;
+  string first_name             = 4;
+  string last_name              = 5;
+  string currency               = 6; // e.g. "USD", "INR"
+  string theme                  = 7; // e.g. "light", "dark", "system"
+  string weekly_start           = 8; // e.g. "monday", "sunday"
+  int32  monthly_start_day      = 9; // e.g. 1
+  double budget_alert_threshold = 10; // e.g. 80.0
+  string created_at             = 11;
+}
+
+message GetProfileRequest {}
+
+message GetProfileResponse {
+  UserProfile profile = 1;
+}
+
+message UpdateProfileRequest {
+  optional string email                  = 1;
+  optional string first_name             = 2;
+  optional string last_name              = 3;
+  optional string currency               = 4;
+  optional string theme                  = 5;
+  optional string weekly_start           = 6;
+  optional int32  monthly_start_day      = 7;
+  optional double budget_alert_threshold = 8;
+}
+
+message UpdateProfileResponse {
+  string      message = 1;
+  UserProfile profile = 2;
+}
+
+message UpdatePasswordRequest {
+  string old_password = 1;
+  string new_password = 2;
+}
+
+message UpdatePasswordResponse {
+  string message = 1;
+}
+
+message DeleteProfileRequest {}
+
+message DeleteProfileResponse {
+  string message = 1;
+}
+
+service UserService {
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+  rpc UpdatePassword(UpdatePasswordRequest) returns (UpdatePasswordResponse);
+  rpc DeleteProfile(DeleteProfileRequest) returns (DeleteProfileResponse);
+}

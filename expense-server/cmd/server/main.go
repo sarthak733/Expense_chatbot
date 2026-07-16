@@ -159,4 +159,11 @@ func registerRoutes(mux *http.ServeMux, h *handler.Handler, db *sql.DB, jwtSecre
 		connect.WithInterceptors(authInterceptor),
 	)
 	mux.Handle(expensePath, expenseHandler)
+
+	// UserService: JWT auth interceptor gates every RPC in this service.
+	userPath, userHandler := expensev1connect.NewUserServiceHandler(
+		h,
+		connect.WithInterceptors(authInterceptor),
+	)
+	mux.Handle(userPath, userHandler)
 }

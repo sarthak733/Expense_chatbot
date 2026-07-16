@@ -178,6 +178,14 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "username", Type: field.TypeString, Unique: true},
 		{Name: "password_hash", Type: field.TypeString},
+		{Name: "email", Type: field.TypeString, Nullable: true},
+		{Name: "first_name", Type: field.TypeString, Nullable: true},
+		{Name: "last_name", Type: field.TypeString, Nullable: true},
+		{Name: "currency", Type: field.TypeString, Default: "USD"},
+		{Name: "theme", Type: field.TypeString, Default: "system"},
+		{Name: "weekly_start", Type: field.TypeString, Default: "monday"},
+		{Name: "monthly_start_day", Type: field.TypeInt, Default: 1},
+		{Name: "budget_alert_threshold", Type: field.TypeFloat64, Default: 80},
 		{Name: "created_at", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP")},
 	}
 	// UsersTable holds the schema information for the "users" table.

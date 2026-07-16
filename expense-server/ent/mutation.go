@@ -4412,6 +4412,16 @@ type UserMutation struct {
 	id                        *int
 	username                  *string
 	password_hash             *string
+	email                     *string
+	first_name                *string
+	last_name                 *string
+	currency                  *string
+	theme                     *string
+	weekly_start              *string
+	monthly_start_day         *int
+	addmonthly_start_day      *int
+	budget_alert_threshold    *float64
+	addbudget_alert_threshold *float64
 	created_at                *time.Time
 	clearedFields             map[string]struct{}
 	sessions                  map[string]struct{}
@@ -4611,6 +4621,373 @@ func (m *UserMutation) OldPasswordHash(ctx context.Context) (v string, err error
 // ResetPasswordHash resets all changes to the "password_hash" field.
 func (m *UserMutation) ResetPasswordHash() {
 	m.password_hash = nil
+}
+
+// SetEmail sets the "email" field.
+func (m *UserMutation) SetEmail(s string) {
+	m.email = &s
+}
+
+// Email returns the value of the "email" field in the mutation.
+func (m *UserMutation) Email() (r string, exists bool) {
+	v := m.email
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEmail returns the old "email" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldEmail(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEmail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEmail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEmail: %w", err)
+	}
+	return oldValue.Email, nil
+}
+
+// ClearEmail clears the value of the "email" field.
+func (m *UserMutation) ClearEmail() {
+	m.email = nil
+	m.clearedFields[user.FieldEmail] = struct{}{}
+}
+
+// EmailCleared returns if the "email" field was cleared in this mutation.
+func (m *UserMutation) EmailCleared() bool {
+	_, ok := m.clearedFields[user.FieldEmail]
+	return ok
+}
+
+// ResetEmail resets all changes to the "email" field.
+func (m *UserMutation) ResetEmail() {
+	m.email = nil
+	delete(m.clearedFields, user.FieldEmail)
+}
+
+// SetFirstName sets the "first_name" field.
+func (m *UserMutation) SetFirstName(s string) {
+	m.first_name = &s
+}
+
+// FirstName returns the value of the "first_name" field in the mutation.
+func (m *UserMutation) FirstName() (r string, exists bool) {
+	v := m.first_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirstName returns the old "first_name" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldFirstName(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFirstName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFirstName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirstName: %w", err)
+	}
+	return oldValue.FirstName, nil
+}
+
+// ClearFirstName clears the value of the "first_name" field.
+func (m *UserMutation) ClearFirstName() {
+	m.first_name = nil
+	m.clearedFields[user.FieldFirstName] = struct{}{}
+}
+
+// FirstNameCleared returns if the "first_name" field was cleared in this mutation.
+func (m *UserMutation) FirstNameCleared() bool {
+	_, ok := m.clearedFields[user.FieldFirstName]
+	return ok
+}
+
+// ResetFirstName resets all changes to the "first_name" field.
+func (m *UserMutation) ResetFirstName() {
+	m.first_name = nil
+	delete(m.clearedFields, user.FieldFirstName)
+}
+
+// SetLastName sets the "last_name" field.
+func (m *UserMutation) SetLastName(s string) {
+	m.last_name = &s
+}
+
+// LastName returns the value of the "last_name" field in the mutation.
+func (m *UserMutation) LastName() (r string, exists bool) {
+	v := m.last_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastName returns the old "last_name" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldLastName(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastName: %w", err)
+	}
+	return oldValue.LastName, nil
+}
+
+// ClearLastName clears the value of the "last_name" field.
+func (m *UserMutation) ClearLastName() {
+	m.last_name = nil
+	m.clearedFields[user.FieldLastName] = struct{}{}
+}
+
+// LastNameCleared returns if the "last_name" field was cleared in this mutation.
+func (m *UserMutation) LastNameCleared() bool {
+	_, ok := m.clearedFields[user.FieldLastName]
+	return ok
+}
+
+// ResetLastName resets all changes to the "last_name" field.
+func (m *UserMutation) ResetLastName() {
+	m.last_name = nil
+	delete(m.clearedFields, user.FieldLastName)
+}
+
+// SetCurrency sets the "currency" field.
+func (m *UserMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *UserMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *UserMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetTheme sets the "theme" field.
+func (m *UserMutation) SetTheme(s string) {
+	m.theme = &s
+}
+
+// Theme returns the value of the "theme" field in the mutation.
+func (m *UserMutation) Theme() (r string, exists bool) {
+	v := m.theme
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTheme returns the old "theme" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldTheme(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTheme is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTheme requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTheme: %w", err)
+	}
+	return oldValue.Theme, nil
+}
+
+// ResetTheme resets all changes to the "theme" field.
+func (m *UserMutation) ResetTheme() {
+	m.theme = nil
+}
+
+// SetWeeklyStart sets the "weekly_start" field.
+func (m *UserMutation) SetWeeklyStart(s string) {
+	m.weekly_start = &s
+}
+
+// WeeklyStart returns the value of the "weekly_start" field in the mutation.
+func (m *UserMutation) WeeklyStart() (r string, exists bool) {
+	v := m.weekly_start
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWeeklyStart returns the old "weekly_start" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldWeeklyStart(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWeeklyStart is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWeeklyStart requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWeeklyStart: %w", err)
+	}
+	return oldValue.WeeklyStart, nil
+}
+
+// ResetWeeklyStart resets all changes to the "weekly_start" field.
+func (m *UserMutation) ResetWeeklyStart() {
+	m.weekly_start = nil
+}
+
+// SetMonthlyStartDay sets the "monthly_start_day" field.
+func (m *UserMutation) SetMonthlyStartDay(i int) {
+	m.monthly_start_day = &i
+	m.addmonthly_start_day = nil
+}
+
+// MonthlyStartDay returns the value of the "monthly_start_day" field in the mutation.
+func (m *UserMutation) MonthlyStartDay() (r int, exists bool) {
+	v := m.monthly_start_day
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMonthlyStartDay returns the old "monthly_start_day" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldMonthlyStartDay(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMonthlyStartDay is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMonthlyStartDay requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMonthlyStartDay: %w", err)
+	}
+	return oldValue.MonthlyStartDay, nil
+}
+
+// AddMonthlyStartDay adds i to the "monthly_start_day" field.
+func (m *UserMutation) AddMonthlyStartDay(i int) {
+	if m.addmonthly_start_day != nil {
+		*m.addmonthly_start_day += i
+	} else {
+		m.addmonthly_start_day = &i
+	}
+}
+
+// AddedMonthlyStartDay returns the value that was added to the "monthly_start_day" field in this mutation.
+func (m *UserMutation) AddedMonthlyStartDay() (r int, exists bool) {
+	v := m.addmonthly_start_day
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMonthlyStartDay resets all changes to the "monthly_start_day" field.
+func (m *UserMutation) ResetMonthlyStartDay() {
+	m.monthly_start_day = nil
+	m.addmonthly_start_day = nil
+}
+
+// SetBudgetAlertThreshold sets the "budget_alert_threshold" field.
+func (m *UserMutation) SetBudgetAlertThreshold(f float64) {
+	m.budget_alert_threshold = &f
+	m.addbudget_alert_threshold = nil
+}
+
+// BudgetAlertThreshold returns the value of the "budget_alert_threshold" field in the mutation.
+func (m *UserMutation) BudgetAlertThreshold() (r float64, exists bool) {
+	v := m.budget_alert_threshold
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBudgetAlertThreshold returns the old "budget_alert_threshold" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldBudgetAlertThreshold(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBudgetAlertThreshold is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBudgetAlertThreshold requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBudgetAlertThreshold: %w", err)
+	}
+	return oldValue.BudgetAlertThreshold, nil
+}
+
+// AddBudgetAlertThreshold adds f to the "budget_alert_threshold" field.
+func (m *UserMutation) AddBudgetAlertThreshold(f float64) {
+	if m.addbudget_alert_threshold != nil {
+		*m.addbudget_alert_threshold += f
+	} else {
+		m.addbudget_alert_threshold = &f
+	}
+}
+
+// AddedBudgetAlertThreshold returns the value that was added to the "budget_alert_threshold" field in this mutation.
+func (m *UserMutation) AddedBudgetAlertThreshold() (r float64, exists bool) {
+	v := m.addbudget_alert_threshold
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBudgetAlertThreshold resets all changes to the "budget_alert_threshold" field.
+func (m *UserMutation) ResetBudgetAlertThreshold() {
+	m.budget_alert_threshold = nil
+	m.addbudget_alert_threshold = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -5007,12 +5384,36 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 11)
 	if m.username != nil {
 		fields = append(fields, user.FieldUsername)
 	}
 	if m.password_hash != nil {
 		fields = append(fields, user.FieldPasswordHash)
+	}
+	if m.email != nil {
+		fields = append(fields, user.FieldEmail)
+	}
+	if m.first_name != nil {
+		fields = append(fields, user.FieldFirstName)
+	}
+	if m.last_name != nil {
+		fields = append(fields, user.FieldLastName)
+	}
+	if m.currency != nil {
+		fields = append(fields, user.FieldCurrency)
+	}
+	if m.theme != nil {
+		fields = append(fields, user.FieldTheme)
+	}
+	if m.weekly_start != nil {
+		fields = append(fields, user.FieldWeeklyStart)
+	}
+	if m.monthly_start_day != nil {
+		fields = append(fields, user.FieldMonthlyStartDay)
+	}
+	if m.budget_alert_threshold != nil {
+		fields = append(fields, user.FieldBudgetAlertThreshold)
 	}
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
@@ -5029,6 +5430,22 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Username()
 	case user.FieldPasswordHash:
 		return m.PasswordHash()
+	case user.FieldEmail:
+		return m.Email()
+	case user.FieldFirstName:
+		return m.FirstName()
+	case user.FieldLastName:
+		return m.LastName()
+	case user.FieldCurrency:
+		return m.Currency()
+	case user.FieldTheme:
+		return m.Theme()
+	case user.FieldWeeklyStart:
+		return m.WeeklyStart()
+	case user.FieldMonthlyStartDay:
+		return m.MonthlyStartDay()
+	case user.FieldBudgetAlertThreshold:
+		return m.BudgetAlertThreshold()
 	case user.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -5044,6 +5461,22 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUsername(ctx)
 	case user.FieldPasswordHash:
 		return m.OldPasswordHash(ctx)
+	case user.FieldEmail:
+		return m.OldEmail(ctx)
+	case user.FieldFirstName:
+		return m.OldFirstName(ctx)
+	case user.FieldLastName:
+		return m.OldLastName(ctx)
+	case user.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case user.FieldTheme:
+		return m.OldTheme(ctx)
+	case user.FieldWeeklyStart:
+		return m.OldWeeklyStart(ctx)
+	case user.FieldMonthlyStartDay:
+		return m.OldMonthlyStartDay(ctx)
+	case user.FieldBudgetAlertThreshold:
+		return m.OldBudgetAlertThreshold(ctx)
 	case user.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -5069,6 +5502,62 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPasswordHash(v)
 		return nil
+	case user.FieldEmail:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEmail(v)
+		return nil
+	case user.FieldFirstName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirstName(v)
+		return nil
+	case user.FieldLastName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastName(v)
+		return nil
+	case user.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case user.FieldTheme:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTheme(v)
+		return nil
+	case user.FieldWeeklyStart:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWeeklyStart(v)
+		return nil
+	case user.FieldMonthlyStartDay:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMonthlyStartDay(v)
+		return nil
+	case user.FieldBudgetAlertThreshold:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBudgetAlertThreshold(v)
+		return nil
 	case user.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -5083,13 +5572,26 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addmonthly_start_day != nil {
+		fields = append(fields, user.FieldMonthlyStartDay)
+	}
+	if m.addbudget_alert_threshold != nil {
+		fields = append(fields, user.FieldBudgetAlertThreshold)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case user.FieldMonthlyStartDay:
+		return m.AddedMonthlyStartDay()
+	case user.FieldBudgetAlertThreshold:
+		return m.AddedBudgetAlertThreshold()
+	}
 	return nil, false
 }
 
@@ -5098,6 +5600,20 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldMonthlyStartDay:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMonthlyStartDay(v)
+		return nil
+	case user.FieldBudgetAlertThreshold:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBudgetAlertThreshold(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -5105,7 +5621,17 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(user.FieldEmail) {
+		fields = append(fields, user.FieldEmail)
+	}
+	if m.FieldCleared(user.FieldFirstName) {
+		fields = append(fields, user.FieldFirstName)
+	}
+	if m.FieldCleared(user.FieldLastName) {
+		fields = append(fields, user.FieldLastName)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -5118,6 +5644,17 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
+	switch name {
+	case user.FieldEmail:
+		m.ClearEmail()
+		return nil
+	case user.FieldFirstName:
+		m.ClearFirstName()
+		return nil
+	case user.FieldLastName:
+		m.ClearLastName()
+		return nil
+	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
 
@@ -5130,6 +5667,30 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldPasswordHash:
 		m.ResetPasswordHash()
+		return nil
+	case user.FieldEmail:
+		m.ResetEmail()
+		return nil
+	case user.FieldFirstName:
+		m.ResetFirstName()
+		return nil
+	case user.FieldLastName:
+		m.ResetLastName()
+		return nil
+	case user.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case user.FieldTheme:
+		m.ResetTheme()
+		return nil
+	case user.FieldWeeklyStart:
+		m.ResetWeeklyStart()
+		return nil
+	case user.FieldMonthlyStartDay:
+		m.ResetMonthlyStartDay()
+		return nil
+	case user.FieldBudgetAlertThreshold:
+		m.ResetBudgetAlertThreshold()
 		return nil
 	case user.FieldCreatedAt:
 		m.ResetCreatedAt()

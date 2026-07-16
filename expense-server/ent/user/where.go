@@ -65,6 +65,46 @@ func PasswordHash(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldPasswordHash, v))
 }
 
+// Email applies equality check predicate on the "email" field. It's identical to EmailEQ.
+func Email(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldEmail, v))
+}
+
+// FirstName applies equality check predicate on the "first_name" field. It's identical to FirstNameEQ.
+func FirstName(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldFirstName, v))
+}
+
+// LastName applies equality check predicate on the "last_name" field. It's identical to LastNameEQ.
+func LastName(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldLastName, v))
+}
+
+// Currency applies equality check predicate on the "currency" field. It's identical to CurrencyEQ.
+func Currency(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldCurrency, v))
+}
+
+// Theme applies equality check predicate on the "theme" field. It's identical to ThemeEQ.
+func Theme(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTheme, v))
+}
+
+// WeeklyStart applies equality check predicate on the "weekly_start" field. It's identical to WeeklyStartEQ.
+func WeeklyStart(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldWeeklyStart, v))
+}
+
+// MonthlyStartDay applies equality check predicate on the "monthly_start_day" field. It's identical to MonthlyStartDayEQ.
+func MonthlyStartDay(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldMonthlyStartDay, v))
+}
+
+// BudgetAlertThreshold applies equality check predicate on the "budget_alert_threshold" field. It's identical to BudgetAlertThresholdEQ.
+func BudgetAlertThreshold(v float64) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldBudgetAlertThreshold, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCreatedAt, v))
@@ -198,6 +238,506 @@ func PasswordHashEqualFold(v string) predicate.User {
 // PasswordHashContainsFold applies the ContainsFold predicate on the "password_hash" field.
 func PasswordHashContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldPasswordHash, v))
+}
+
+// EmailEQ applies the EQ predicate on the "email" field.
+func EmailEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldEmail, v))
+}
+
+// EmailNEQ applies the NEQ predicate on the "email" field.
+func EmailNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldEmail, v))
+}
+
+// EmailIn applies the In predicate on the "email" field.
+func EmailIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldEmail, vs...))
+}
+
+// EmailNotIn applies the NotIn predicate on the "email" field.
+func EmailNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldEmail, vs...))
+}
+
+// EmailGT applies the GT predicate on the "email" field.
+func EmailGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldEmail, v))
+}
+
+// EmailGTE applies the GTE predicate on the "email" field.
+func EmailGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldEmail, v))
+}
+
+// EmailLT applies the LT predicate on the "email" field.
+func EmailLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldEmail, v))
+}
+
+// EmailLTE applies the LTE predicate on the "email" field.
+func EmailLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldEmail, v))
+}
+
+// EmailContains applies the Contains predicate on the "email" field.
+func EmailContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldEmail, v))
+}
+
+// EmailHasPrefix applies the HasPrefix predicate on the "email" field.
+func EmailHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldEmail, v))
+}
+
+// EmailHasSuffix applies the HasSuffix predicate on the "email" field.
+func EmailHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldEmail, v))
+}
+
+// EmailIsNil applies the IsNil predicate on the "email" field.
+func EmailIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldEmail))
+}
+
+// EmailNotNil applies the NotNil predicate on the "email" field.
+func EmailNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldEmail))
+}
+
+// EmailEqualFold applies the EqualFold predicate on the "email" field.
+func EmailEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldEmail, v))
+}
+
+// EmailContainsFold applies the ContainsFold predicate on the "email" field.
+func EmailContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldEmail, v))
+}
+
+// FirstNameEQ applies the EQ predicate on the "first_name" field.
+func FirstNameEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldFirstName, v))
+}
+
+// FirstNameNEQ applies the NEQ predicate on the "first_name" field.
+func FirstNameNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldFirstName, v))
+}
+
+// FirstNameIn applies the In predicate on the "first_name" field.
+func FirstNameIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldFirstName, vs...))
+}
+
+// FirstNameNotIn applies the NotIn predicate on the "first_name" field.
+func FirstNameNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldFirstName, vs...))
+}
+
+// FirstNameGT applies the GT predicate on the "first_name" field.
+func FirstNameGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldFirstName, v))
+}
+
+// FirstNameGTE applies the GTE predicate on the "first_name" field.
+func FirstNameGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldFirstName, v))
+}
+
+// FirstNameLT applies the LT predicate on the "first_name" field.
+func FirstNameLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldFirstName, v))
+}
+
+// FirstNameLTE applies the LTE predicate on the "first_name" field.
+func FirstNameLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldFirstName, v))
+}
+
+// FirstNameContains applies the Contains predicate on the "first_name" field.
+func FirstNameContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldFirstName, v))
+}
+
+// FirstNameHasPrefix applies the HasPrefix predicate on the "first_name" field.
+func FirstNameHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldFirstName, v))
+}
+
+// FirstNameHasSuffix applies the HasSuffix predicate on the "first_name" field.
+func FirstNameHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldFirstName, v))
+}
+
+// FirstNameIsNil applies the IsNil predicate on the "first_name" field.
+func FirstNameIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldFirstName))
+}
+
+// FirstNameNotNil applies the NotNil predicate on the "first_name" field.
+func FirstNameNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldFirstName))
+}
+
+// FirstNameEqualFold applies the EqualFold predicate on the "first_name" field.
+func FirstNameEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldFirstName, v))
+}
+
+// FirstNameContainsFold applies the ContainsFold predicate on the "first_name" field.
+func FirstNameContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldFirstName, v))
+}
+
+// LastNameEQ applies the EQ predicate on the "last_name" field.
+func LastNameEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldLastName, v))
+}
+
+// LastNameNEQ applies the NEQ predicate on the "last_name" field.
+func LastNameNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldLastName, v))
+}
+
+// LastNameIn applies the In predicate on the "last_name" field.
+func LastNameIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldLastName, vs...))
+}
+
+// LastNameNotIn applies the NotIn predicate on the "last_name" field.
+func LastNameNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldLastName, vs...))
+}
+
+// LastNameGT applies the GT predicate on the "last_name" field.
+func LastNameGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldLastName, v))
+}
+
+// LastNameGTE applies the GTE predicate on the "last_name" field.
+func LastNameGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldLastName, v))
+}
+
+// LastNameLT applies the LT predicate on the "last_name" field.
+func LastNameLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldLastName, v))
+}
+
+// LastNameLTE applies the LTE predicate on the "last_name" field.
+func LastNameLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldLastName, v))
+}
+
+// LastNameContains applies the Contains predicate on the "last_name" field.
+func LastNameContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldLastName, v))
+}
+
+// LastNameHasPrefix applies the HasPrefix predicate on the "last_name" field.
+func LastNameHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldLastName, v))
+}
+
+// LastNameHasSuffix applies the HasSuffix predicate on the "last_name" field.
+func LastNameHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldLastName, v))
+}
+
+// LastNameIsNil applies the IsNil predicate on the "last_name" field.
+func LastNameIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldLastName))
+}
+
+// LastNameNotNil applies the NotNil predicate on the "last_name" field.
+func LastNameNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldLastName))
+}
+
+// LastNameEqualFold applies the EqualFold predicate on the "last_name" field.
+func LastNameEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldLastName, v))
+}
+
+// LastNameContainsFold applies the ContainsFold predicate on the "last_name" field.
+func LastNameContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldLastName, v))
+}
+
+// CurrencyEQ applies the EQ predicate on the "currency" field.
+func CurrencyEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldCurrency, v))
+}
+
+// CurrencyNEQ applies the NEQ predicate on the "currency" field.
+func CurrencyNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldCurrency, v))
+}
+
+// CurrencyIn applies the In predicate on the "currency" field.
+func CurrencyIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldCurrency, vs...))
+}
+
+// CurrencyNotIn applies the NotIn predicate on the "currency" field.
+func CurrencyNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldCurrency, vs...))
+}
+
+// CurrencyGT applies the GT predicate on the "currency" field.
+func CurrencyGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldCurrency, v))
+}
+
+// CurrencyGTE applies the GTE predicate on the "currency" field.
+func CurrencyGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldCurrency, v))
+}
+
+// CurrencyLT applies the LT predicate on the "currency" field.
+func CurrencyLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldCurrency, v))
+}
+
+// CurrencyLTE applies the LTE predicate on the "currency" field.
+func CurrencyLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldCurrency, v))
+}
+
+// CurrencyContains applies the Contains predicate on the "currency" field.
+func CurrencyContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldCurrency, v))
+}
+
+// CurrencyHasPrefix applies the HasPrefix predicate on the "currency" field.
+func CurrencyHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldCurrency, v))
+}
+
+// CurrencyHasSuffix applies the HasSuffix predicate on the "currency" field.
+func CurrencyHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldCurrency, v))
+}
+
+// CurrencyEqualFold applies the EqualFold predicate on the "currency" field.
+func CurrencyEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldCurrency, v))
+}
+
+// CurrencyContainsFold applies the ContainsFold predicate on the "currency" field.
+func CurrencyContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldCurrency, v))
+}
+
+// ThemeEQ applies the EQ predicate on the "theme" field.
+func ThemeEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTheme, v))
+}
+
+// ThemeNEQ applies the NEQ predicate on the "theme" field.
+func ThemeNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldTheme, v))
+}
+
+// ThemeIn applies the In predicate on the "theme" field.
+func ThemeIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldTheme, vs...))
+}
+
+// ThemeNotIn applies the NotIn predicate on the "theme" field.
+func ThemeNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldTheme, vs...))
+}
+
+// ThemeGT applies the GT predicate on the "theme" field.
+func ThemeGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldTheme, v))
+}
+
+// ThemeGTE applies the GTE predicate on the "theme" field.
+func ThemeGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldTheme, v))
+}
+
+// ThemeLT applies the LT predicate on the "theme" field.
+func ThemeLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldTheme, v))
+}
+
+// ThemeLTE applies the LTE predicate on the "theme" field.
+func ThemeLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldTheme, v))
+}
+
+// ThemeContains applies the Contains predicate on the "theme" field.
+func ThemeContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldTheme, v))
+}
+
+// ThemeHasPrefix applies the HasPrefix predicate on the "theme" field.
+func ThemeHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldTheme, v))
+}
+
+// ThemeHasSuffix applies the HasSuffix predicate on the "theme" field.
+func ThemeHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldTheme, v))
+}
+
+// ThemeEqualFold applies the EqualFold predicate on the "theme" field.
+func ThemeEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldTheme, v))
+}
+
+// ThemeContainsFold applies the ContainsFold predicate on the "theme" field.
+func ThemeContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldTheme, v))
+}
+
+// WeeklyStartEQ applies the EQ predicate on the "weekly_start" field.
+func WeeklyStartEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldWeeklyStart, v))
+}
+
+// WeeklyStartNEQ applies the NEQ predicate on the "weekly_start" field.
+func WeeklyStartNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldWeeklyStart, v))
+}
+
+// WeeklyStartIn applies the In predicate on the "weekly_start" field.
+func WeeklyStartIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldWeeklyStart, vs...))
+}
+
+// WeeklyStartNotIn applies the NotIn predicate on the "weekly_start" field.
+func WeeklyStartNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldWeeklyStart, vs...))
+}
+
+// WeeklyStartGT applies the GT predicate on the "weekly_start" field.
+func WeeklyStartGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldWeeklyStart, v))
+}
+
+// WeeklyStartGTE applies the GTE predicate on the "weekly_start" field.
+func WeeklyStartGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldWeeklyStart, v))
+}
+
+// WeeklyStartLT applies the LT predicate on the "weekly_start" field.
+func WeeklyStartLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldWeeklyStart, v))
+}
+
+// WeeklyStartLTE applies the LTE predicate on the "weekly_start" field.
+func WeeklyStartLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldWeeklyStart, v))
+}
+
+// WeeklyStartContains applies the Contains predicate on the "weekly_start" field.
+func WeeklyStartContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldWeeklyStart, v))
+}
+
+// WeeklyStartHasPrefix applies the HasPrefix predicate on the "weekly_start" field.
+func WeeklyStartHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldWeeklyStart, v))
+}
+
+// WeeklyStartHasSuffix applies the HasSuffix predicate on the "weekly_start" field.
+func WeeklyStartHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldWeeklyStart, v))
+}
+
+// WeeklyStartEqualFold applies the EqualFold predicate on the "weekly_start" field.
+func WeeklyStartEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldWeeklyStart, v))
+}
+
+// WeeklyStartContainsFold applies the ContainsFold predicate on the "weekly_start" field.
+func WeeklyStartContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldWeeklyStart, v))
+}
+
+// MonthlyStartDayEQ applies the EQ predicate on the "monthly_start_day" field.
+func MonthlyStartDayEQ(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldMonthlyStartDay, v))
+}
+
+// MonthlyStartDayNEQ applies the NEQ predicate on the "monthly_start_day" field.
+func MonthlyStartDayNEQ(v int) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldMonthlyStartDay, v))
+}
+
+// MonthlyStartDayIn applies the In predicate on the "monthly_start_day" field.
+func MonthlyStartDayIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldIn(FieldMonthlyStartDay, vs...))
+}
+
+// MonthlyStartDayNotIn applies the NotIn predicate on the "monthly_start_day" field.
+func MonthlyStartDayNotIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldMonthlyStartDay, vs...))
+}
+
+// MonthlyStartDayGT applies the GT predicate on the "monthly_start_day" field.
+func MonthlyStartDayGT(v int) predicate.User {
+	return predicate.User(sql.FieldGT(FieldMonthlyStartDay, v))
+}
+
+// MonthlyStartDayGTE applies the GTE predicate on the "monthly_start_day" field.
+func MonthlyStartDayGTE(v int) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldMonthlyStartDay, v))
+}
+
+// MonthlyStartDayLT applies the LT predicate on the "monthly_start_day" field.
+func MonthlyStartDayLT(v int) predicate.User {
+	return predicate.User(sql.FieldLT(FieldMonthlyStartDay, v))
+}
+
+// MonthlyStartDayLTE applies the LTE predicate on the "monthly_start_day" field.
+func MonthlyStartDayLTE(v int) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldMonthlyStartDay, v))
+}
+
+// BudgetAlertThresholdEQ applies the EQ predicate on the "budget_alert_threshold" field.
+func BudgetAlertThresholdEQ(v float64) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldBudgetAlertThreshold, v))
+}
+
+// BudgetAlertThresholdNEQ applies the NEQ predicate on the "budget_alert_threshold" field.
+func BudgetAlertThresholdNEQ(v float64) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldBudgetAlertThreshold, v))
+}
+
+// BudgetAlertThresholdIn applies the In predicate on the "budget_alert_threshold" field.
+func BudgetAlertThresholdIn(vs ...float64) predicate.User {
+	return predicate.User(sql.FieldIn(FieldBudgetAlertThreshold, vs...))
+}
+
+// BudgetAlertThresholdNotIn applies the NotIn predicate on the "budget_alert_threshold" field.
+func BudgetAlertThresholdNotIn(vs ...float64) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldBudgetAlertThreshold, vs...))
+}
+
+// BudgetAlertThresholdGT applies the GT predicate on the "budget_alert_threshold" field.
+func BudgetAlertThresholdGT(v float64) predicate.User {
+	return predicate.User(sql.FieldGT(FieldBudgetAlertThreshold, v))
+}
+
+// BudgetAlertThresholdGTE applies the GTE predicate on the "budget_alert_threshold" field.
+func BudgetAlertThresholdGTE(v float64) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldBudgetAlertThreshold, v))
+}
+
+// BudgetAlertThresholdLT applies the LT predicate on the "budget_alert_threshold" field.
+func BudgetAlertThresholdLT(v float64) predicate.User {
+	return predicate.User(sql.FieldLT(FieldBudgetAlertThreshold, v))
+}
+
+// BudgetAlertThresholdLTE applies the LTE predicate on the "budget_alert_threshold" field.
+func BudgetAlertThresholdLTE(v float64) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldBudgetAlertThreshold, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

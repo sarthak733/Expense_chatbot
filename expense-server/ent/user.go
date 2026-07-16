@@ -21,6 +21,22 @@ type User struct {
 	Username string `json:"username,omitempty"`
 	// PasswordHash holds the value of the "password_hash" field.
 	PasswordHash string `json:"password_hash,omitempty"`
+	// Email holds the value of the "email" field.
+	Email *string `json:"email,omitempty"`
+	// FirstName holds the value of the "first_name" field.
+	FirstName *string `json:"first_name,omitempty"`
+	// LastName holds the value of the "last_name" field.
+	LastName *string `json:"last_name,omitempty"`
+	// Currency holds the value of the "currency" field.
+	Currency string `json:"currency,omitempty"`
+	// Theme holds the value of the "theme" field.
+	Theme string `json:"theme,omitempty"`
+	// WeeklyStart holds the value of the "weekly_start" field.
+	WeeklyStart string `json:"weekly_start,omitempty"`
+	// MonthlyStartDay holds the value of the "monthly_start_day" field.
+	MonthlyStartDay int `json:"monthly_start_day,omitempty"`
+	// BudgetAlertThreshold holds the value of the "budget_alert_threshold" field.
+	BudgetAlertThreshold float64 `json:"budget_alert_threshold,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -107,9 +123,11 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID:
+		case user.FieldBudgetAlertThreshold:
+			values[i] = new(sql.NullFloat64)
+		case user.FieldID, user.FieldMonthlyStartDay:
 			values[i] = new(sql.NullInt64)
-		case user.FieldUsername, user.FieldPasswordHash:
+		case user.FieldUsername, user.FieldPasswordHash, user.FieldEmail, user.FieldFirstName, user.FieldLastName, user.FieldCurrency, user.FieldTheme, user.FieldWeeklyStart:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -145,6 +163,57 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field password_hash", values[i])
 			} else if value.Valid {
 				u.PasswordHash = value.String
+			}
+		case user.FieldEmail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field email", values[i])
+			} else if value.Valid {
+				u.Email = new(string)
+				*u.Email = value.String
+			}
+		case user.FieldFirstName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field first_name", values[i])
+			} else if value.Valid {
+				u.FirstName = new(string)
+				*u.FirstName = value.String
+			}
+		case user.FieldLastName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field last_name", values[i])
+			} else if value.Valid {
+				u.LastName = new(string)
+				*u.LastName = value.String
+			}
+		case user.FieldCurrency:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field currency", values[i])
+			} else if value.Valid {
+				u.Currency = value.String
+			}
+		case user.FieldTheme:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field theme", values[i])
+			} else if value.Valid {
+				u.Theme = value.String
+			}
+		case user.FieldWeeklyStart:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field weekly_start", values[i])
+			} else if value.Valid {
+				u.WeeklyStart = value.String
+			}
+		case user.FieldMonthlyStartDay:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field monthly_start_day", values[i])
+			} else if value.Valid {
+				u.MonthlyStartDay = int(value.Int64)
+			}
+		case user.FieldBudgetAlertThreshold:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field budget_alert_threshold", values[i])
+			} else if value.Valid {
+				u.BudgetAlertThreshold = value.Float64
 			}
 		case user.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -223,6 +292,36 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("password_hash=")
 	builder.WriteString(u.PasswordHash)
+	builder.WriteString(", ")
+	if v := u.Email; v != nil {
+		builder.WriteString("email=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := u.FirstName; v != nil {
+		builder.WriteString("first_name=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := u.LastName; v != nil {
+		builder.WriteString("last_name=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("currency=")
+	builder.WriteString(u.Currency)
+	builder.WriteString(", ")
+	builder.WriteString("theme=")
+	builder.WriteString(u.Theme)
+	builder.WriteString(", ")
+	builder.WriteString("weekly_start=")
+	builder.WriteString(u.WeeklyStart)
+	builder.WriteString(", ")
+	builder.WriteString("monthly_start_day=")
+	builder.WriteString(fmt.Sprintf("%v", u.MonthlyStartDay))
+	builder.WriteString(", ")
+	builder.WriteString("budget_alert_threshold=")
+	builder.WriteString(fmt.Sprintf("%v", u.BudgetAlertThreshold))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))

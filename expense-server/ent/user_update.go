@@ -62,6 +62,150 @@ func (uu *UserUpdate) SetNillablePasswordHash(s *string) *UserUpdate {
 	return uu
 }
 
+// SetEmail sets the "email" field.
+func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
+	uu.mutation.SetEmail(s)
+	return uu
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableEmail(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetEmail(*s)
+	}
+	return uu
+}
+
+// ClearEmail clears the value of the "email" field.
+func (uu *UserUpdate) ClearEmail() *UserUpdate {
+	uu.mutation.ClearEmail()
+	return uu
+}
+
+// SetFirstName sets the "first_name" field.
+func (uu *UserUpdate) SetFirstName(s string) *UserUpdate {
+	uu.mutation.SetFirstName(s)
+	return uu
+}
+
+// SetNillableFirstName sets the "first_name" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableFirstName(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetFirstName(*s)
+	}
+	return uu
+}
+
+// ClearFirstName clears the value of the "first_name" field.
+func (uu *UserUpdate) ClearFirstName() *UserUpdate {
+	uu.mutation.ClearFirstName()
+	return uu
+}
+
+// SetLastName sets the "last_name" field.
+func (uu *UserUpdate) SetLastName(s string) *UserUpdate {
+	uu.mutation.SetLastName(s)
+	return uu
+}
+
+// SetNillableLastName sets the "last_name" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableLastName(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetLastName(*s)
+	}
+	return uu
+}
+
+// ClearLastName clears the value of the "last_name" field.
+func (uu *UserUpdate) ClearLastName() *UserUpdate {
+	uu.mutation.ClearLastName()
+	return uu
+}
+
+// SetCurrency sets the "currency" field.
+func (uu *UserUpdate) SetCurrency(s string) *UserUpdate {
+	uu.mutation.SetCurrency(s)
+	return uu
+}
+
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableCurrency(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetCurrency(*s)
+	}
+	return uu
+}
+
+// SetTheme sets the "theme" field.
+func (uu *UserUpdate) SetTheme(s string) *UserUpdate {
+	uu.mutation.SetTheme(s)
+	return uu
+}
+
+// SetNillableTheme sets the "theme" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableTheme(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetTheme(*s)
+	}
+	return uu
+}
+
+// SetWeeklyStart sets the "weekly_start" field.
+func (uu *UserUpdate) SetWeeklyStart(s string) *UserUpdate {
+	uu.mutation.SetWeeklyStart(s)
+	return uu
+}
+
+// SetNillableWeeklyStart sets the "weekly_start" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableWeeklyStart(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetWeeklyStart(*s)
+	}
+	return uu
+}
+
+// SetMonthlyStartDay sets the "monthly_start_day" field.
+func (uu *UserUpdate) SetMonthlyStartDay(i int) *UserUpdate {
+	uu.mutation.ResetMonthlyStartDay()
+	uu.mutation.SetMonthlyStartDay(i)
+	return uu
+}
+
+// SetNillableMonthlyStartDay sets the "monthly_start_day" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableMonthlyStartDay(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetMonthlyStartDay(*i)
+	}
+	return uu
+}
+
+// AddMonthlyStartDay adds i to the "monthly_start_day" field.
+func (uu *UserUpdate) AddMonthlyStartDay(i int) *UserUpdate {
+	uu.mutation.AddMonthlyStartDay(i)
+	return uu
+}
+
+// SetBudgetAlertThreshold sets the "budget_alert_threshold" field.
+func (uu *UserUpdate) SetBudgetAlertThreshold(f float64) *UserUpdate {
+	uu.mutation.ResetBudgetAlertThreshold()
+	uu.mutation.SetBudgetAlertThreshold(f)
+	return uu
+}
+
+// SetNillableBudgetAlertThreshold sets the "budget_alert_threshold" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableBudgetAlertThreshold(f *float64) *UserUpdate {
+	if f != nil {
+		uu.SetBudgetAlertThreshold(*f)
+	}
+	return uu
+}
+
+// AddBudgetAlertThreshold adds f to the "budget_alert_threshold" field.
+func (uu *UserUpdate) AddBudgetAlertThreshold(f float64) *UserUpdate {
+	uu.mutation.AddBudgetAlertThreshold(f)
+	return uu
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (uu *UserUpdate) SetCreatedAt(t time.Time) *UserUpdate {
 	uu.mutation.SetCreatedAt(t)
@@ -356,6 +500,45 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.PasswordHash(); ok {
 		_spec.SetField(user.FieldPasswordHash, field.TypeString, value)
+	}
+	if value, ok := uu.mutation.Email(); ok {
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	}
+	if uu.mutation.EmailCleared() {
+		_spec.ClearField(user.FieldEmail, field.TypeString)
+	}
+	if value, ok := uu.mutation.FirstName(); ok {
+		_spec.SetField(user.FieldFirstName, field.TypeString, value)
+	}
+	if uu.mutation.FirstNameCleared() {
+		_spec.ClearField(user.FieldFirstName, field.TypeString)
+	}
+	if value, ok := uu.mutation.LastName(); ok {
+		_spec.SetField(user.FieldLastName, field.TypeString, value)
+	}
+	if uu.mutation.LastNameCleared() {
+		_spec.ClearField(user.FieldLastName, field.TypeString)
+	}
+	if value, ok := uu.mutation.Currency(); ok {
+		_spec.SetField(user.FieldCurrency, field.TypeString, value)
+	}
+	if value, ok := uu.mutation.Theme(); ok {
+		_spec.SetField(user.FieldTheme, field.TypeString, value)
+	}
+	if value, ok := uu.mutation.WeeklyStart(); ok {
+		_spec.SetField(user.FieldWeeklyStart, field.TypeString, value)
+	}
+	if value, ok := uu.mutation.MonthlyStartDay(); ok {
+		_spec.SetField(user.FieldMonthlyStartDay, field.TypeInt, value)
+	}
+	if value, ok := uu.mutation.AddedMonthlyStartDay(); ok {
+		_spec.AddField(user.FieldMonthlyStartDay, field.TypeInt, value)
+	}
+	if value, ok := uu.mutation.BudgetAlertThreshold(); ok {
+		_spec.SetField(user.FieldBudgetAlertThreshold, field.TypeFloat64, value)
+	}
+	if value, ok := uu.mutation.AddedBudgetAlertThreshold(); ok {
+		_spec.AddField(user.FieldBudgetAlertThreshold, field.TypeFloat64, value)
 	}
 	if value, ok := uu.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
@@ -675,6 +858,150 @@ func (uuo *UserUpdateOne) SetNillablePasswordHash(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetPasswordHash(*s)
 	}
+	return uuo
+}
+
+// SetEmail sets the "email" field.
+func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
+	uuo.mutation.SetEmail(s)
+	return uuo
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableEmail(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetEmail(*s)
+	}
+	return uuo
+}
+
+// ClearEmail clears the value of the "email" field.
+func (uuo *UserUpdateOne) ClearEmail() *UserUpdateOne {
+	uuo.mutation.ClearEmail()
+	return uuo
+}
+
+// SetFirstName sets the "first_name" field.
+func (uuo *UserUpdateOne) SetFirstName(s string) *UserUpdateOne {
+	uuo.mutation.SetFirstName(s)
+	return uuo
+}
+
+// SetNillableFirstName sets the "first_name" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableFirstName(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetFirstName(*s)
+	}
+	return uuo
+}
+
+// ClearFirstName clears the value of the "first_name" field.
+func (uuo *UserUpdateOne) ClearFirstName() *UserUpdateOne {
+	uuo.mutation.ClearFirstName()
+	return uuo
+}
+
+// SetLastName sets the "last_name" field.
+func (uuo *UserUpdateOne) SetLastName(s string) *UserUpdateOne {
+	uuo.mutation.SetLastName(s)
+	return uuo
+}
+
+// SetNillableLastName sets the "last_name" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableLastName(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetLastName(*s)
+	}
+	return uuo
+}
+
+// ClearLastName clears the value of the "last_name" field.
+func (uuo *UserUpdateOne) ClearLastName() *UserUpdateOne {
+	uuo.mutation.ClearLastName()
+	return uuo
+}
+
+// SetCurrency sets the "currency" field.
+func (uuo *UserUpdateOne) SetCurrency(s string) *UserUpdateOne {
+	uuo.mutation.SetCurrency(s)
+	return uuo
+}
+
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableCurrency(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetCurrency(*s)
+	}
+	return uuo
+}
+
+// SetTheme sets the "theme" field.
+func (uuo *UserUpdateOne) SetTheme(s string) *UserUpdateOne {
+	uuo.mutation.SetTheme(s)
+	return uuo
+}
+
+// SetNillableTheme sets the "theme" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableTheme(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetTheme(*s)
+	}
+	return uuo
+}
+
+// SetWeeklyStart sets the "weekly_start" field.
+func (uuo *UserUpdateOne) SetWeeklyStart(s string) *UserUpdateOne {
+	uuo.mutation.SetWeeklyStart(s)
+	return uuo
+}
+
+// SetNillableWeeklyStart sets the "weekly_start" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableWeeklyStart(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetWeeklyStart(*s)
+	}
+	return uuo
+}
+
+// SetMonthlyStartDay sets the "monthly_start_day" field.
+func (uuo *UserUpdateOne) SetMonthlyStartDay(i int) *UserUpdateOne {
+	uuo.mutation.ResetMonthlyStartDay()
+	uuo.mutation.SetMonthlyStartDay(i)
+	return uuo
+}
+
+// SetNillableMonthlyStartDay sets the "monthly_start_day" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableMonthlyStartDay(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetMonthlyStartDay(*i)
+	}
+	return uuo
+}
+
+// AddMonthlyStartDay adds i to the "monthly_start_day" field.
+func (uuo *UserUpdateOne) AddMonthlyStartDay(i int) *UserUpdateOne {
+	uuo.mutation.AddMonthlyStartDay(i)
+	return uuo
+}
+
+// SetBudgetAlertThreshold sets the "budget_alert_threshold" field.
+func (uuo *UserUpdateOne) SetBudgetAlertThreshold(f float64) *UserUpdateOne {
+	uuo.mutation.ResetBudgetAlertThreshold()
+	uuo.mutation.SetBudgetAlertThreshold(f)
+	return uuo
+}
+
+// SetNillableBudgetAlertThreshold sets the "budget_alert_threshold" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableBudgetAlertThreshold(f *float64) *UserUpdateOne {
+	if f != nil {
+		uuo.SetBudgetAlertThreshold(*f)
+	}
+	return uuo
+}
+
+// AddBudgetAlertThreshold adds f to the "budget_alert_threshold" field.
+func (uuo *UserUpdateOne) AddBudgetAlertThreshold(f float64) *UserUpdateOne {
+	uuo.mutation.AddBudgetAlertThreshold(f)
 	return uuo
 }
 
@@ -1002,6 +1329,45 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.PasswordHash(); ok {
 		_spec.SetField(user.FieldPasswordHash, field.TypeString, value)
+	}
+	if value, ok := uuo.mutation.Email(); ok {
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	}
+	if uuo.mutation.EmailCleared() {
+		_spec.ClearField(user.FieldEmail, field.TypeString)
+	}
+	if value, ok := uuo.mutation.FirstName(); ok {
+		_spec.SetField(user.FieldFirstName, field.TypeString, value)
+	}
+	if uuo.mutation.FirstNameCleared() {
+		_spec.ClearField(user.FieldFirstName, field.TypeString)
+	}
+	if value, ok := uuo.mutation.LastName(); ok {
+		_spec.SetField(user.FieldLastName, field.TypeString, value)
+	}
+	if uuo.mutation.LastNameCleared() {
+		_spec.ClearField(user.FieldLastName, field.TypeString)
+	}
+	if value, ok := uuo.mutation.Currency(); ok {
+		_spec.SetField(user.FieldCurrency, field.TypeString, value)
+	}
+	if value, ok := uuo.mutation.Theme(); ok {
+		_spec.SetField(user.FieldTheme, field.TypeString, value)
+	}
+	if value, ok := uuo.mutation.WeeklyStart(); ok {
+		_spec.SetField(user.FieldWeeklyStart, field.TypeString, value)
+	}
+	if value, ok := uuo.mutation.MonthlyStartDay(); ok {
+		_spec.SetField(user.FieldMonthlyStartDay, field.TypeInt, value)
+	}
+	if value, ok := uuo.mutation.AddedMonthlyStartDay(); ok {
+		_spec.AddField(user.FieldMonthlyStartDay, field.TypeInt, value)
+	}
+	if value, ok := uuo.mutation.BudgetAlertThreshold(); ok {
+		_spec.SetField(user.FieldBudgetAlertThreshold, field.TypeFloat64, value)
+	}
+	if value, ok := uuo.mutation.AddedBudgetAlertThreshold(); ok {
+		_spec.AddField(user.FieldBudgetAlertThreshold, field.TypeFloat64, value)
 	}
 	if value, ok := uuo.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)

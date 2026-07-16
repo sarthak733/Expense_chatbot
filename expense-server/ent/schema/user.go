@@ -20,6 +20,14 @@ func (User) Fields() []ent.Field {
 		field.Int("id"),
 		field.String("username").NotEmpty().Unique(),
 		field.String("password_hash").NotEmpty(),
+		field.String("email").Optional().Nillable(),
+		field.String("first_name").Optional().Nillable(),
+		field.String("last_name").Optional().Nillable(),
+		field.String("currency").Default("USD"),
+		field.String("theme").Default("system"),
+		field.String("weekly_start").Default("monday"),
+		field.Int("monthly_start_day").Default(1),
+		field.Float("budget_alert_threshold").Default(80.0),
 		field.Time("created_at").Default(time.Now).
 			Annotations(entsql.DefaultExpr("CURRENT_TIMESTAMP")),
 	}
