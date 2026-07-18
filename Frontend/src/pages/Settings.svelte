@@ -55,6 +55,10 @@
   }
 
   async function saveProfile() {
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      pushToast("That doesn't look like a valid email address.", "error");
+      return;
+    }
     savingProfile = true;
     try {
       const res = await userClient.updateProfile({
