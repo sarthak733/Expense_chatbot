@@ -1,0 +1,407 @@
+syntax = "proto3";
+
+package expense.v1;
+
+option go_package = "expense-server/gen/expense/v1;expensev1";
+
+// ---------------------------------------------------------------------------
+// Shared data shape — returned in every response that includes an expense.
+// ---------------------------------------------------------------------------
+
+message Expense {
+  int32  id          = 1;
+  int32  user_id     = 2;
+  string title       = 3;
+  double amount      = 4;
+  string category    = 5; // Category name (stored for display)
+  string created_at  = 6; // RFC 3339 formatted timestamp
+  int32  category_id = 7; // Category ID in database
+}
+
+// ---------------------------------------------------------------------------
+// CreateExpense — POST equivalent
+// user_id is NOT in the request; it is read from the auth token server-side.
+// ---------------------------------------------------------------------------
+
+message CreateExpenseRequest {
+  string title       = 1;
+  double amount      = 2;
+  string category    = 3; // Optional category name
+  int32  category_id = 4; // Optional category ID
+}
+
+message CreateExpenseResponse {
+  string  message = 1;
+  Expense expense = 2;
+}
+
+// ---------------------------------------------------------------------------
+// GetExpense — GET /expenses/{id} equivalent
+// ---------------------------------------------------------------------------
+
+message GetExpenseRequest {
+  int32 id = 1;
+}
+
+message GetExpenseResponse {
+  string  message = 1;
+  Expense expense = 2;
+}
+
+// ---------------------------------------------------------------------------
+// ListExpenses — GET /expenses equivalent
+// Returns only the expenses belonging to the authenticated user.
+// ---------------------------------------------------------------------------
+
+message ListExpensesRequest {
+  int32  limit      = 1;
+  int32  offset     = 2;
+  string start_date = 3; // Optional: e.g., "YYYY-MM-DD" or RFC3339
+  string end_date   = 4; // Optional: e.g., "YYYY-MM-DD" or RFC3339
+}
+
+message ListExpensesResponse {
+  string           message     = 1;
+  repeated Expense expenses    = 2;
+  int32            total_count = 3;
+}
+
+// ---------------------------------------------------------------------------
+// UpdateExpense — PUT /expenses/{id} equivalent
+// Server checks ownership before updating.
+// ---------------------------------------------------------------------------
+
+message UpdateExpenseRequest {
+  int32  id          = 1;
+  string title       = 2;
+  double amount      = 3;
+  string category    = 4;
+  int32  category_id = 5;
+}
+
+message UpdateExpenseResponse {
+  string  message = 1;
+  Expense expense = 2;
+}
+
+// ---------------------------------------------------------------------------
+// DeleteExpense — DELETE /expenses/{id} equivalent
+// Server checks ownership before deleting.
+// ---------------------------------------------------------------------------
+
+message DeleteExpenseRequest {
+  int32 id = 1;
+}
+
+message DeleteExpenseResponse {
+  string message = 1;
+}
+
+// ---------------------------------------------------------------------------
+// Category Messages
+// ---------------------------------------------------------------------------
+
+message Category {
+  int32  id         = 1;
+  int32  user_id    = 2; // 0 for default/system category
+  string name       = 3;
+  string color      = 4; // e.g. "#FF5733"
+  string created_at = 5;
+}
+
+message CreateCategoryRequest {
+  string name  = 1;
+  string color = 2; // Hex code, e.g. "#FF5733"
+}
+
+message CreateCategoryResponse {
+  string   message  = 1;
+  Category category = 2;
+}
+
+message ListCategoriesRequest {}
+
+message ListCategoriesResponse {
+  repeated Category categories = 1;
+}
+
+message UpdateCategoryRequest {
+  int32  id    = 1;
+  string name  = 2;
+  string color = 3;
+}
+
+message UpdateCategoryResponse {
+  string   message  = 1;
+  Category category = 2;
+}
+
+message DeleteCategoryRequest {
+  int32 id = 1;
+}
+
+message DeleteCategoryResponse {
+  string message = 1;
+}
+
+// ---------------------------------------------------------------------------
+// Budget Messages
+// ---------------------------------------------------------------------------
+
+message Budget {
+  int32  id          = 1;
+  int32  user_id     = 2;
+  int32  category_id = 3; // 0/empty means overall budget
+  double amount      = 4;
+  string period      = 5; // "weekly", "monthly", "yearly"
+  string start_date  = 6; // YYYY-MM-DD
+  string end_date    = 7; // YYYY-MM-DD
+  string created_at  = 8;
+
+  // Status tracking fields
+  double spent       = 9;
+  double remaining   = 10;
+  double percentage  = 11;
+  string status      = 12; // "green", "warning", "exceeded"
+}
+
+message CreateBudgetRequest {
+  int32  category_id = 1; // 0 for overall
+  double amount      = 2;
+  string period      = 3; // "weekly", "monthly", "yearly"
+  string start_date  = 4; // YYYY-MM-DD
+  string end_date    = 5; // YYYY-MM-DD
+}
+
+message CreateBudgetResponse {
+  string message = 1;
+  Budget budget  = 2;
+}
+
+message ListBudgetsRequest {}
+
+message ListBudgetsResponse {
+  repeated Budget budgets = 1;
+}
+
+message UpdateBudgetRequest {
+  int32  id          = 1;
+  int32  category_id = 2;
+  double amount      = 3;
+  string start_date  = 4;
+  string end_date    = 5;
+}
+
+message UpdateBudgetResponse {
+  string message = 1;
+  Budget budget  = 2;
+}
+
+message DeleteBudgetRequest {
+  int32 id = 1;
+}
+
+message DeleteBudgetResponse {
+  string message = 1;
+}
+
+// ---------------------------------------------------------------------------
+// Recurring Expense Messages
+// ---------------------------------------------------------------------------
+
+message RecurringExpense {
+  int32  id             = 1;
+  int32  user_id        = 2;
+  string title          = 3;
+  double amount         = 4;
+  int32  category_id    = 5;
+  string category       = 6;
+  string interval       = 7; // "daily", "weekly", "monthly", "yearly"
+  string next_run_date  = 8; // YYYY-MM-DD
+  string last_run_date  = 9; // YYYY-MM-DD (empty if never run)
+  bool   is_active      = 10;
+  string created_at     = 11;
+}
+
+message CreateRecurringExpenseRequest {
+  string title          = 1;
+  double amount         = 2;
+  int32  category_id    = 3;
+  string interval       = 4; // "daily", "weekly", "monthly", "yearly"
+  string next_run_date  = 5; // YYYY-MM-DD
+}
+
+message CreateRecurringExpenseResponse {
+  string           message           = 1;
+  RecurringExpense recurring_expense = 2;
+}
+
+message ListRecurringExpensesRequest {}
+
+message ListRecurringExpensesResponse {
+  repeated RecurringExpense recurring_expenses = 1;
+}
+
+message UpdateRecurringExpenseRequest {
+  int32  id             = 1;
+  string title          = 2;
+  double amount         = 3;
+  int32  category_id    = 4;
+  string interval       = 5;
+  string next_run_date  = 6;
+  bool   is_active      = 7;
+}
+
+message UpdateRecurringExpenseResponse {
+  string           message           = 1;
+  RecurringExpense recurring_expense = 2;
+}
+
+message DeleteRecurringExpenseRequest {
+  int32 id = 1;
+}
+
+message DeleteRecurringExpenseResponse {
+  string message = 1;
+}
+
+// ---------------------------------------------------------------------------
+// Export Messages
+// ---------------------------------------------------------------------------
+
+message ExportExpensesRequest {
+  string start_date = 1; // Optional
+  string end_date   = 2; // Optional
+}
+
+message ExportExpensesCSVResponse {
+  bytes csv_data = 1;
+}
+
+message ExportExpensesPDFResponse {
+  bytes pdf_data = 1;
+}
+
+// ---------------------------------------------------------------------------
+// NLP Parsing Messages
+// ---------------------------------------------------------------------------
+
+message ParseExpenseTextRequest {
+  string text = 1;
+}
+
+message ParseExpenseTextResponse {
+  string title       = 2;
+  double amount      = 3;
+  string category    = 4;
+  int32  category_id = 5;
+  string date        = 6; // YYYY-MM-DD or RFC3339
+}
+
+message QuickAddExpenseRequest {
+  string text = 1;
+}
+
+message QuickAddExpenseResponse {
+  string  message = 1;
+  Expense expense = 2;
+}
+
+// ---------------------------------------------------------------------------
+// Monthly Comparison Insights Messages
+// ---------------------------------------------------------------------------
+
+message CategoryInsight {
+  string category           = 1;
+  double current_spent      = 2;
+  double prev_spent         = 3;
+  double diff_percentage    = 4;
+}
+
+message GetMonthlyInsightsRequest {}
+
+message GetMonthlyInsightsResponse {
+  string current_month              = 1; // e.g. "July 2026"
+  string prev_month                 = 2; // e.g. "June 2026"
+  double current_total              = 3;
+  double prev_total                 = 4;
+  double total_diff_percentage      = 5;
+  repeated CategoryInsight category_insights = 6;
+  repeated string general_insights  = 7;
+}
+
+// ---------------------------------------------------------------------------
+// Chat History Messages
+// ---------------------------------------------------------------------------
+
+message ChatMessage {
+  int32  id           = 1;
+  int32  user_id      = 2;
+  string role         = 3; // "user" or "assistant"
+  string message_text = 4;
+  string created_at   = 5;
+}
+
+message SendChatMessageRequest {
+  string message_text = 1;
+}
+
+message SendChatMessageResponse {
+  ChatMessage user_message = 1;
+  ChatMessage bot_response = 2;
+}
+
+message GetChatHistoryRequest {
+  int32 limit  = 1;
+  int32 offset = 2;
+}
+
+message GetChatHistoryResponse {
+  repeated ChatMessage messages = 1;
+  int32 total_count             = 2;
+}
+
+// ---------------------------------------------------------------------------
+// Service definition
+// ---------------------------------------------------------------------------
+
+service ExpenseService {
+  rpc CreateExpense (CreateExpenseRequest)  returns (CreateExpenseResponse);
+  rpc GetExpense    (GetExpenseRequest)     returns (GetExpenseResponse);
+  rpc ListExpenses  (ListExpensesRequest)   returns (ListExpensesResponse);
+  rpc UpdateExpense (UpdateExpenseRequest)  returns (UpdateExpenseResponse);
+  rpc DeleteExpense (DeleteExpenseRequest)  returns (DeleteExpenseResponse);
+
+  // Categories
+  rpc CreateCategory (CreateCategoryRequest) returns (CreateCategoryResponse);
+  rpc ListCategories (ListCategoriesRequest) returns (ListCategoriesResponse);
+  rpc UpdateCategory (UpdateCategoryRequest) returns (UpdateCategoryResponse);
+  rpc DeleteCategory (DeleteCategoryRequest) returns (DeleteCategoryResponse);
+
+  // Budgets
+  rpc CreateBudget (CreateBudgetRequest) returns (CreateBudgetResponse);
+  rpc ListBudgets  (ListBudgetsRequest)  returns (ListBudgetsResponse);
+  rpc UpdateBudget (UpdateBudgetRequest) returns (UpdateBudgetResponse);
+  rpc DeleteBudget (DeleteBudgetRequest) returns (DeleteBudgetResponse);
+
+  // Recurring Expenses
+  rpc CreateRecurringExpense (CreateRecurringExpenseRequest) returns (CreateRecurringExpenseResponse);
+  rpc ListRecurringExpenses  (ListRecurringExpensesRequest)  returns (ListRecurringExpensesResponse);
+  rpc UpdateRecurringExpense (UpdateRecurringExpenseRequest) returns (UpdateRecurringExpenseResponse);
+  rpc DeleteRecurringExpense (DeleteRecurringExpenseRequest) returns (DeleteRecurringExpenseResponse);
+
+  // Exports
+  rpc ExportExpensesCSV (ExportExpensesRequest) returns (ExportExpensesCSVResponse);
+  rpc ExportExpensesPDF (ExportExpensesRequest) returns (ExportExpensesPDFResponse);
+
+  // NLP quick add & parse
+  rpc ParseExpenseText (ParseExpenseTextRequest) returns (ParseExpenseTextResponse);
+  rpc QuickAddExpense  (QuickAddExpenseRequest)  returns (QuickAddExpenseResponse);
+
+  // Monthly Comparison Insights
+  rpc GetMonthlyInsights (GetMonthlyInsightsRequest) returns (GetMonthlyInsightsResponse);
+
+  // Chat message & history
+  rpc SendChatMessage (SendChatMessageRequest) returns (SendChatMessageResponse);
+  rpc GetChatHistory  (GetChatHistoryRequest)  returns (GetChatHistoryResponse);
+}
