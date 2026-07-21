@@ -16,6 +16,23 @@ import (
 	"expense-server/internal/nlp"
 )
 
+// currencySymbol maps a currency code to its display symbol for chat
+// replies. Falls back to the code itself (e.g. "AUD ") if unrecognized.
+func currencySymbol(code string) string {
+	switch code {
+	case "INR":
+		return "₹"
+	case "USD":
+		return "$"
+	case "EUR":
+		return "€"
+	case "GBP":
+		return "£"
+	default:
+		return code + " "
+	}
+}
+
 // SendChatMessage logs a user's natural language message, parses it to execute expense commands if possible,
 // and returns both the logged message and the assistant's reply.
 func (h *Handler) SendChatMessage(
@@ -27,6 +44,14 @@ func (h *Handler) SendChatMessage(
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("not authenticated"))
 	}
+
+	// Look up the user's currency preference so chat replies match
+	// what they see everywhere else in the app.
+	var userCurrency string
+	if err := h.DB.QueryRowContext(ctx, `SELECT currency FROM users WHERE id = $1`, userID).Scan(&userCurrency); err != nil {
+		userCurrency = "USD" // fall back to the column default if the lookup fails
+	}
+	symbol := currencySymbol(userCurrency)
 
 	userText := strings.TrimSpace(req.Msg.MessageText)
 	if userText == "" {
@@ -53,7 +78,7 @@ func (h *Handler) SendChatMessage(
 		catID, catName, err := h.resolveCategory(ctx, userID, 0, parsed.Category)
 		if err != nil {
 			log.Printf("ERROR resolving category in Chatbot QuickAdd: %v", err)
-			botReply = fmt.Sprintf("I parsed an expense of $%.2f for '%s', but failed to resolve the category due to a database error.", parsed.Amount, parsed.Title)
+			botReply = fmt.Sprintf("I parsed an expense of %s%.2f for '%s', but failed to resolve the category due to a database error.", symbol, parsed.Amount, parsed.Title)
 		} else {
 			// Insert the expense into database
 			query := `
@@ -68,9 +93,9 @@ func (h *Handler) SendChatMessage(
 
 			if err != nil {
 				log.Printf("ERROR inserting expense in Chatbot: %v", err)
-				botReply = fmt.Sprintf("I parsed an expense of $%.2f for '%s', but failed to save it to the database.", parsed.Amount, parsed.Title)
+				botReply = fmt.Sprintf("I parsed an expense of %s%.2f for '%s', but failed to save it to the database.", symbol, parsed.Amount, parsed.Title)
 			} else {
-				botReply = fmt.Sprintf("Successfully logged an expense: $%.2f for '%s' in category '%s'.", parsed.Amount, parsed.Title, catName)
+				botReply = fmt.Sprintf("Successfully logged an expense: %s%.2f for '%s' in category '%s'.", symbol, parsed.Amount, parsed.Title, catName)
 			}
 		}
 	} else {

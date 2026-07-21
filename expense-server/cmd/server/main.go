@@ -83,6 +83,7 @@ func main() {
 	var root http.Handler = mux
 	root = middleware.Logging(root)
 	root = middleware.Recover(root)
+	root = middleware.CORS(root)
 
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,
