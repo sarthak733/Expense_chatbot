@@ -17,10 +17,14 @@ func (h *Handler) ExportExpensesCSV(
 	req *connect.Request[expensev1.ExportExpensesRequest],
 ) (*connect.Response[expensev1.ExportExpensesCSVResponse], error) {
 
-	_, ok := middleware.UserIDFromContext(ctx)
+	userID, ok := middleware.UserIDFromContext(ctx)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("not authenticated"))
 	}
+
+	// Fetch user's preferred currency for display in the export.
+	currency, _ := getUserCurrency(ctx, h.DB, userID)
+	sym := currencySymbol(currency)
 
 	// Reuse ListExpenses logic to retrieve filtered list of expenses
 	listReq := &connect.Request[expensev1.ListExpensesRequest]{
@@ -39,7 +43,7 @@ func (h *Handler) ExportExpensesCSV(
 	writer := csv.NewWriter(&buf)
 
 	// Write CSV Header
-	_ = writer.Write([]string{"ID", "Date", "Description", "Category", "Amount"})
+	_ = writer.Write([]string{"ID", "Date", "Description", "Category", "Currency", "Amount"})
 
 	for _, exp := range res.Msg.Expenses {
 		_ = writer.Write([]string{
@@ -47,7 +51,8 @@ func (h *Handler) ExportExpensesCSV(
 			exp.CreatedAt,
 			exp.Title,
 			exp.Category,
-			fmt.Sprintf("%.2f", exp.Amount),
+			currency,
+			fmt.Sprintf("%s%.2f", sym, exp.Amount),
 		})
 	}
 	writer.Flush()
@@ -56,3 +61,4 @@ func (h *Handler) ExportExpensesCSV(
 		CsvData: buf.Bytes(),
 	}), nil
 }
+

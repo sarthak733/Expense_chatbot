@@ -58,29 +58,34 @@ func (h *Handler) CreateBudget(
 		dbCategoryID.Valid = true
 	}
 
+	// Fetch user's current currency to store with the budget.
+	currency, _ := getUserCurrency(ctx, h.DB, userID)
+
 	query := `
-		INSERT INTO budgets (user_id, category_id, amount, period, start_date, end_date)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO budgets (user_id, category_id, amount, period, start_date, end_date, currency)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at`
 
 	var id int32
 	var createdAt time.Time
-	err = h.DB.QueryRowContext(ctx, query, userID, dbCategoryID, req.Msg.Amount, period, startDate, endDate).
+	err = h.DB.QueryRowContext(ctx, query, userID, dbCategoryID, req.Msg.Amount, period, startDate, endDate, currency).
 		Scan(&id, &createdAt)
 	if err != nil {
 		log.Printf("ERROR inserting budget: %v", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
 	}
 
-	// Status tracking calculation (spent so far)
+	// Status tracking calculation (spent so far).
+	// Only count expenses in the same currency as this budget to avoid cross-currency mixing.
 	var spent float64
-	var totalSpentQuery string
 	if dbCategoryID.Valid {
-		totalSpentQuery = `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND category_id = $2 AND created_at >= $3 AND created_at <= $4`
-		_ = h.DB.QueryRowContext(ctx, totalSpentQuery, userID, dbCategoryID.Int32, startDate, endDate).Scan(&spent)
+		_ = h.DB.QueryRowContext(ctx,
+			`SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND category_id = $2 AND created_at >= $3 AND created_at <= $4 AND currency = $5`,
+			userID, dbCategoryID.Int32, startDate, endDate, currency).Scan(&spent)
 	} else {
-		totalSpentQuery = `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at <= $3`
-		_ = h.DB.QueryRowContext(ctx, totalSpentQuery, userID, startDate, endDate).Scan(&spent)
+		_ = h.DB.QueryRowContext(ctx,
+			`SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at <= $3 AND currency = $4`,
+			userID, startDate, endDate, currency).Scan(&spent)
 	}
 
 	remaining := req.Msg.Amount - spent
