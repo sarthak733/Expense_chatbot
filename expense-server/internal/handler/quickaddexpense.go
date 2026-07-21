@@ -34,14 +34,17 @@ func (h *Handler) QuickAddExpense(
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
 	}
 
+	// Fetch the user's current currency so it is stored with the expense.
+	currency, _ := getUserCurrency(ctx, h.DB, userID)
+
 	query := `
-		INSERT INTO expenses (user_id, title, amount, category, category_id, created_at)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO expenses (user_id, title, amount, category, category_id, created_at, currency)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at`
 
 	var id int32
 	var createdAt time.Time
-	err = h.DB.QueryRowContext(ctx, query, userID, parsed.Title, parsed.Amount, catName, catID, parsed.Date).
+	err = h.DB.QueryRowContext(ctx, query, userID, parsed.Title, parsed.Amount, catName, catID, parsed.Date, currency).
 		Scan(&id, &createdAt)
 	if err != nil {
 		log.Printf("ERROR quick-adding expense: %v", err)

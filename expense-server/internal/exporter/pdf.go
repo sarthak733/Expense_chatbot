@@ -10,7 +10,9 @@ import (
 )
 
 // GenerateExpensesPDF creates a beautifully styled PDF from a list of expenses.
-func GenerateExpensesPDF(expenses []*expensev1.Expense, username string) ([]byte, error) {
+// currency is an ISO 4217 code such as "USD", "INR", "EUR".
+func GenerateExpensesPDF(expenses []*expensev1.Expense, username, currency string) ([]byte, error) {
+	sym := pdfCurrencySymbol(currency)
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetMargins(15, 20, 15)
 	pdf.AddPage()
@@ -97,7 +99,7 @@ func GenerateExpensesPDF(expenses []*expensev1.Expense, username string) ([]byte
 		pdf.CellFormat(colDateWidth, h, dateStr, "B", 0, "L", true, 0, "")
 		pdf.CellFormat(colTitleWidth, h, exp.Title, "B", 0, "L", true, 0, "")
 		pdf.CellFormat(colCategoryWidth, h, exp.Category, "B", 0, "L", true, 0, "")
-		pdf.CellFormat(colAmountWidth, h, fmt.Sprintf("$%.2f", exp.Amount), "B", 1, "R", true, 0, "")
+		pdf.CellFormat(colAmountWidth, h, fmt.Sprintf("%s%.2f", sym, exp.Amount), "B", 1, "R", true, 0, "")
 
 		totalAmount += exp.Amount
 		fill = !fill
@@ -112,7 +114,7 @@ func GenerateExpensesPDF(expenses []*expensev1.Expense, username string) ([]byte
 	pdf.CellFormat(colIDWidth+colDateWidth+colTitleWidth+colCategoryWidth, 10, "Total Spending:", "", 0, "R", false, 0, "")
 	
 	pdf.SetTextColor(accentColor[0], accentColor[1], accentColor[2])
-	pdf.CellFormat(colAmountWidth, 10, fmt.Sprintf("$%.2f", totalAmount), "", 1, "R", false, 0, "")
+	pdf.CellFormat(colAmountWidth, 10, fmt.Sprintf("%s%.2f", sym, totalAmount), "", 1, "R", false, 0, "")
 
 	// --- Footer Signature (Subtle) ---
 	pdf.SetTextColor(128, 128, 128)
@@ -126,4 +128,24 @@ func GenerateExpensesPDF(expenses []*expensev1.Expense, username string) ([]byte
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+// pdfCurrencySymbol maps an ISO 4217 currency code to a printable symbol.
+// Falls back to the code itself for unmapped currencies.
+func pdfCurrencySymbol(code string) string {
+	symbols := map[string]string{
+		"USD": "$", "EUR": "EUR ", "GBP": "GBP ", "INR": "Rs ",
+		"JPY": "JPY ", "CNY": "CNY ", "KRW": "KRW ", "CAD": "CA$",
+		"AUD": "A$", "NZD": "NZ$", "SGD": "S$", "HKD": "HK$",
+		"CHF": "Fr ", "BRL": "R$", "MXN": "MX$", "ZAR": "R ",
+		"RUB": "RUB ", "PKR": "Rs ", "BDT": "BDT ", "THB": "THB ",
+		"AED": "AED ", "SAR": "SAR ", "TRY": "TRY ", "PLN": "zl ",
+		"ILS": "ILS ", "NOK": "kr ", "SEK": "kr ", "DKK": "kr ",
+		"IDR": "Rp ", "MYR": "RM ", "PHP": "PHP ", "VND": "VND ",
+		"NGN": "NGN ", "COP": "COP$",
+	}
+	if sym, ok := symbols[code]; ok {
+		return sym
+	}
+	return code + " "
 }

@@ -22,6 +22,10 @@ func (h *Handler) GetMonthlyInsights(
 		return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("not authenticated"))
 	}
 
+	// Fetch user's preferred currency for filtering and display.
+	userCurrency, _ := getUserCurrency(ctx, h.DB, userID)
+	sym := currencySymbol(userCurrency)
+
 	now := time.Now()
 	currentMonthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
 	currentMonthEndExcl := currentMonthStart.AddDate(0, 1, 0)
@@ -29,28 +33,31 @@ func (h *Handler) GetMonthlyInsights(
 	prevMonthStart := currentMonthStart.AddDate(0, -1, 0)
 	prevMonthEndExcl := currentMonthStart
 
-	// 1. Get totals
+	// 1. Get totals — only expenses matching the user's current currency.
 	var currentTotal, prevTotal float64
-	_ = h.DB.QueryRowContext(ctx, "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at < $3", userID, currentMonthStart, currentMonthEndExcl).Scan(&currentTotal)
-	_ = h.DB.QueryRowContext(ctx, "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at < $3", userID, prevMonthStart, prevMonthEndExcl).Scan(&prevTotal)
+	_ = h.DB.QueryRowContext(ctx,
+		"SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at < $3 AND currency = $4",
+		userID, currentMonthStart, currentMonthEndExcl, userCurrency).Scan(&currentTotal)
+	_ = h.DB.QueryRowContext(ctx,
+		"SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at < $3 AND currency = $4",
+		userID, prevMonthStart, prevMonthEndExcl, userCurrency).Scan(&prevTotal)
 
 	totalDiffPercent := 0.0
 	if prevTotal > 0 {
 		totalDiffPercent = ((currentTotal - prevTotal) / prevTotal) * 100.0
 	}
 
-	// 2. Get category breakdown
-	// Fetch current month categories
+	// 2. Get category breakdown — current month.
 	currentCatQuery := `
 		SELECT COALESCE(category, 'Others'), SUM(amount)
 		FROM expenses
-		WHERE user_id = $1 AND created_at >= $2 AND created_at < $3
+		WHERE user_id = $1 AND created_at >= $2 AND created_at < $3 AND currency = $4
 		GROUP BY COALESCE(category, 'Others')`
-	rowsCur, err := h.DB.QueryContext(ctx, currentCatQuery, userID, currentMonthStart, currentMonthEndExcl)
+	rowsCur, err := h.DB.QueryContext(ctx, currentCatQuery, userID, currentMonthStart, currentMonthEndExcl, userCurrency)
 	if err != nil {
 		log.Printf("ERROR fetching current month category spent: %v", err)
 	}
-	
+
 	currentCats := make(map[string]float64)
 	if err == nil {
 		defer rowsCur.Close()
@@ -63,8 +70,8 @@ func (h *Handler) GetMonthlyInsights(
 		}
 	}
 
-	// Fetch prev month categories
-	rowsPrev, err := h.DB.QueryContext(ctx, currentCatQuery, userID, prevMonthStart, prevMonthEndExcl)
+	// Fetch prev month categories.
+	rowsPrev, err := h.DB.QueryContext(ctx, currentCatQuery, userID, prevMonthStart, prevMonthEndExcl, userCurrency)
 	prevCats := make(map[string]float64)
 	if err == nil {
 		defer rowsPrev.Close()
@@ -77,7 +84,7 @@ func (h *Handler) GetMonthlyInsights(
 		}
 	}
 
-	// Compute differences for all unique categories seen across both months
+	// Compute differences for all unique categories seen across both months.
 	allCats := make(map[string]bool)
 	for k := range currentCats {
 		allCats[k] = true
@@ -102,27 +109,35 @@ func (h *Handler) GetMonthlyInsights(
 		})
 	}
 
-	// 3. Generate narrative insights
+	// 3. Generate narrative insights (use currency symbol, not hardcoded $).
 	var generalInsights []string
 	if currentTotal > prevTotal && prevTotal > 0 {
-		generalInsights = append(generalInsights, fmt.Sprintf("Your spending increased by %.1f%% compared to last month. Take a close look at your category budgets.", totalDiffPercent))
+		generalInsights = append(generalInsights, fmt.Sprintf(
+			"Your spending increased by %.1f%% compared to last month. Take a close look at your category budgets.",
+			totalDiffPercent))
 	} else if currentTotal < prevTotal && prevTotal > 0 {
 		savings := prevTotal - currentTotal
-		generalInsights = append(generalInsights, fmt.Sprintf("Great job! You spent $%.2f less than last month (a savings of %.1f%%).", savings, -totalDiffPercent))
+		generalInsights = append(generalInsights, fmt.Sprintf(
+			"Great job! You spent %s%.2f less than last month (a savings of %.1f%%).",
+			sym, savings, -totalDiffPercent))
 	} else if prevTotal == 0 {
 		generalInsights = append(generalInsights, "This is your second month tracking expenses! Compare your spendings as the month progresses.")
 	}
 
-	// Check specific categories with high spikes
+	// Check specific categories with high spikes.
 	for _, ins := range insights {
 		if ins.DiffPercentage > 25.0 && ins.CurrentSpent > 50.0 {
-			generalInsights = append(generalInsights, fmt.Sprintf("Alert: Spending on '%s' has spiked by %.1f%% compared to last month.", ins.Category, ins.DiffPercentage))
+			generalInsights = append(generalInsights, fmt.Sprintf(
+				"Alert: Spending on '%s' has spiked by %.1f%% compared to last month.",
+				ins.Category, ins.DiffPercentage))
 		}
 	}
 
-	// Check overall budget compliance
+	// Check overall budget compliance — only count budgets/expenses in the user's currency.
 	var totalBudgets, exceededBudgets int
-	budgetsRows, err := h.DB.QueryContext(ctx, "SELECT id, category_id, amount, start_date, end_date FROM budgets WHERE user_id = $1", userID)
+	budgetsRows, err := h.DB.QueryContext(ctx,
+		"SELECT id, category_id, amount, start_date, end_date, currency FROM budgets WHERE user_id = $1 AND currency = $2",
+		userID, userCurrency)
 	if err == nil {
 		defer budgetsRows.Close()
 		for budgetsRows.Next() {
@@ -130,13 +145,18 @@ func (h *Handler) GetMonthlyInsights(
 			var cid sql.NullInt32
 			var bAmt float64
 			var sDate, eDate time.Time
-			if err := budgetsRows.Scan(&bid, &cid, &bAmt, &sDate, &eDate); err == nil {
+			var bCurrency string
+			if err := budgetsRows.Scan(&bid, &cid, &bAmt, &sDate, &eDate, &bCurrency); err == nil {
 				totalBudgets++
 				var bSpent float64
 				if cid.Valid {
-					_ = h.DB.QueryRowContext(ctx, "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND category_id = $2 AND created_at >= $3 AND created_at < $4", userID, cid.Int32, sDate, eDate.AddDate(0, 0, 1)).Scan(&bSpent)
+					_ = h.DB.QueryRowContext(ctx,
+						"SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND category_id = $2 AND created_at >= $3 AND created_at < $4 AND currency = $5",
+						userID, cid.Int32, sDate, eDate.AddDate(0, 0, 1), bCurrency).Scan(&bSpent)
 				} else {
-					_ = h.DB.QueryRowContext(ctx, "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at < $3", userID, sDate, eDate.AddDate(0, 0, 1)).Scan(&bSpent)
+					_ = h.DB.QueryRowContext(ctx,
+						"SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at < $3 AND currency = $4",
+						userID, sDate, eDate.AddDate(0, 0, 1), bCurrency).Scan(&bSpent)
 				}
 				if bSpent > bAmt {
 					exceededBudgets++
@@ -145,18 +165,20 @@ func (h *Handler) GetMonthlyInsights(
 		}
 	}
 	if exceededBudgets > 0 {
-		generalInsights = append(generalInsights, fmt.Sprintf("You have exceeded %d out of your %d active budgets.", exceededBudgets, totalBudgets))
+		generalInsights = append(generalInsights, fmt.Sprintf(
+			"You have exceeded %d out of your %d active budgets.", exceededBudgets, totalBudgets))
 	} else if totalBudgets > 0 && exceededBudgets == 0 {
 		generalInsights = append(generalInsights, "Keep it up! You are currently within all of your registered budgets.")
 	}
 
 	return connect.NewResponse(&expensev1.GetMonthlyInsightsResponse{
-		CurrentMonth:         now.Format("January 2006"),
-		PrevMonth:            now.AddDate(0, -1, 0).Format("January 2006"),
-		CurrentTotal:         currentTotal,
-		PrevTotal:            prevTotal,
+		CurrentMonth:        now.Format("January 2006"),
+		PrevMonth:           now.AddDate(0, -1, 0).Format("January 2006"),
+		CurrentTotal:        currentTotal,
+		PrevTotal:           prevTotal,
 		TotalDiffPercentage: totalDiffPercent,
-		CategoryInsights:     insights,
-		GeneralInsights:      generalInsights,
+		CategoryInsights:    insights,
+		GeneralInsights:     generalInsights,
 	}), nil
 }
+

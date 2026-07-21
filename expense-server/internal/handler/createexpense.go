@@ -32,16 +32,19 @@ func (h *Handler) CreateExpense(
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
 	}
 
+	// Fetch the user's current currency so it is stored with the expense.
+	currency, _ := getUserCurrency(ctx, h.DB, userID)
+
 	query := `
-		INSERT INTO expenses (user_id, title, amount, category, category_id)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO expenses (user_id, title, amount, category, category_id, currency)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at`
 
 	var (
 		id        int
 		createdAt time.Time
 	)
-	err = h.DB.QueryRowContext(ctx, query, userID, req.Msg.Title, req.Msg.Amount, catName, catID).
+	err = h.DB.QueryRowContext(ctx, query, userID, req.Msg.Title, req.Msg.Amount, catName, catID, currency).
 		Scan(&id, &createdAt)
 	if err != nil {
 		log.Printf("ERROR inserting expense: %v", err)

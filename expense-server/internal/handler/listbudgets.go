@@ -23,7 +23,7 @@ func (h *Handler) ListBudgets(
 	}
 
 	query := `
-		SELECT id, user_id, category_id, amount, period, start_date, end_date, created_at
+		SELECT id, user_id, category_id, amount, period, start_date, end_date, created_at, currency
 		FROM budgets
 		WHERE user_id = $1
 		ORDER BY created_at DESC`
@@ -43,9 +43,10 @@ func (h *Handler) ListBudgets(
 			startDate  time.Time
 			endDate    time.Time
 			createdAt  time.Time
+			bCurrency  string
 		)
 
-		if err := rows.Scan(&b.Id, &b.UserId, &catID, &b.Amount, &b.Period, &startDate, &endDate, &createdAt); err != nil {
+		if err := rows.Scan(&b.Id, &b.UserId, &catID, &b.Amount, &b.Period, &startDate, &endDate, &createdAt, &bCurrency); err != nil {
 			log.Printf("ERROR scanning budget: %v", err)
 			return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
 		}
@@ -55,19 +56,16 @@ func (h *Handler) ListBudgets(
 		b.EndDate = endDate.Format("2006-01-02")
 		b.CreatedAt = formatTime(createdAt)
 
-		// Calculate spent in range
+		// Calculate spent in range — only include expenses with the same currency as this budget.
 		var spent float64
 		if catID.Valid {
-			// Query with category filter
-			spentQuery := `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND category_id = $2 AND created_at >= $3 AND created_at < $4`
-			// Exclude the day after endDate to capture exact timestamps
+			spentQuery := `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND category_id = $2 AND created_at >= $3 AND created_at < $4 AND currency = $5`
 			nextDay := endDate.AddDate(0, 0, 1)
-			_ = h.DB.QueryRowContext(ctx, spentQuery, userID, catID.Int32, startDate, nextDay).Scan(&spent)
+			_ = h.DB.QueryRowContext(ctx, spentQuery, userID, catID.Int32, startDate, nextDay, bCurrency).Scan(&spent)
 		} else {
-			// Overall budget
-			spentQuery := `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at < $3`
+			spentQuery := `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at < $3 AND currency = $4`
 			nextDay := endDate.AddDate(0, 0, 1)
-			_ = h.DB.QueryRowContext(ctx, spentQuery, userID, startDate, nextDay).Scan(&spent)
+			_ = h.DB.QueryRowContext(ctx, spentQuery, userID, startDate, nextDay, bCurrency).Scan(&spent)
 		}
 
 		b.Spent = spent

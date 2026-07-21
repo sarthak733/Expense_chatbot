@@ -25,6 +25,9 @@ func (h *Handler) ExportExpensesPDF(
 	var username string
 	_ = h.DB.QueryRowContext(ctx, "SELECT username FROM users WHERE id = $1", userID).Scan(&username)
 
+	// Fetch user's preferred currency for the PDF.
+	currency, _ := getUserCurrency(ctx, h.DB, userID)
+
 	listReq := &connect.Request[expensev1.ListExpensesRequest]{
 		Msg: &expensev1.ListExpensesRequest{
 			StartDate: req.Msg.StartDate,
@@ -37,7 +40,7 @@ func (h *Handler) ExportExpensesPDF(
 		return nil, err
 	}
 
-	pdfData, err := exporter.GenerateExpensesPDF(res.Msg.Expenses, username)
+	pdfData, err := exporter.GenerateExpensesPDF(res.Msg.Expenses, username, currency)
 	if err != nil {
 		log.Printf("ERROR generating PDF: %v", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to generate PDF"))
@@ -47,3 +50,4 @@ func (h *Handler) ExportExpensesPDF(
 		PdfData: pdfData,
 	}), nil
 }
+

@@ -14,6 +14,7 @@ import (
 	"connectrpc.com/connect"
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
+	"github.com/rs/cors"
 
 	"expense-server/ent"
 	"expense-server/gen/expense/v1/expensev1connect"
@@ -84,6 +85,28 @@ func main() {
 	root = middleware.Logging(root)
 	root = middleware.Recover(root)
 	root = middleware.CORS(root)
+
+	// 6. Add CORS so the frontend (e.g. localhost:5173) can reach the backend.
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{
+			"http://localhost:5173", // Vite dev server
+			"http://localhost:4173", // Vite preview
+			"http://127.0.0.1:5173",
+		},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{
+			"Authorization",
+			"Content-Type",
+			"Connect-Protocol-Version",
+			"Connect-Timeout-Ms",
+			"Connect-Accept-Encoding",
+			"Connect-Content-Encoding",
+			"Grpc-Timeout",
+			"X-Grpc-Web",
+		},
+		AllowCredentials: true,
+	})
+	root = c.Handler(root)
 
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,
