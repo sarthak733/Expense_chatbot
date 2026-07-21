@@ -1,0 +1,288 @@
+/* -----------------------------------------------------------------------
+   Ledger — design tokens
+   A grounded-in-subject direction: this is an expense chatbot, so the
+   visual language borrows from receipts and paper ledgers — dot-leader
+   rows, hairline rules, tabular mono numerals — rather than generic
+   "dashboard" chrome.
+------------------------------------------------------------------------ */
+
+:root {
+  /* color */
+  --bg: #faf9f5;
+  --surface: #ffffff;
+  --surface-sunk: #f2f0e8;
+  --ink: #1c1f26;
+  --ink-soft: #4a4d56;
+  --muted: #8a8778;
+  --line: #e4e1d5;
+  --line-strong: #d3cfc0;
+  --gold: #a8721f;
+  --gold-soft: #f1e4cc;
+  --sage: #3f6b52;
+  --sage-soft: #e2ebe3;
+  --rust: #a8432c;
+  --rust-soft: #f4e0da;
+
+  /* type */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* layout */
+  --radius: 8px;
+  --radius-sm: 4px;
+  --sidebar-w: 232px;
+}
+
+[data-theme="dark"] {
+  --bg: #15161b;
+  --surface: #1d1f27;
+  --surface-sunk: #24262f;
+  --ink: #f0ede4;
+  --ink-soft: #b9b6ac;
+  --muted: #7d7a70;
+  --line: #33353f;
+  --line-strong: #454852;
+  --gold: #d9a84e;
+  --gold-soft: #3a2f1a;
+  --sage: #6fae8c;
+  --sage-soft: #1f3328;
+  --rust: #d9795d;
+  --rust-soft: #3a221c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* focus visibility, kept even though we style buttons/inputs custom */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* ---------- shared building blocks ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.btn-primary:hover {
+  background: #2c303a;
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: #fff8ec;
+}
+
+.btn-gold:hover {
+  background: #935e18;
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.btn-ghost:hover {
+  border-color: var(--ink);
+}
+
+.btn-danger {
+  background: transparent;
+  border-color: var(--rust);
+  color: var(--rust);
+}
+
+.btn-danger:hover {
+  background: var(--rust-soft);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.field input,
+.field select,
+.field textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 14px;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+/* the signature motif: a receipt line-item row with a dotted leader
+   between the label and the value, like a printed receipt */
+.receipt-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--line-strong);
+}
+
+.receipt-row:last-child {
+  border-bottom: none;
+}
+
+.receipt-row .leader {
+  flex: 1;
+  border-bottom: 1px dotted var(--line-strong);
+  height: 1px;
+  transform: translateY(-4px);
+}
+
+.receipt-row .label {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.receipt-row .value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pill-green {
+  background: var(--sage-soft);
+  color: var(--sage);
+}
+
+.pill-gold {
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.pill-rust {
+  background: var(--rust-soft);
+  color: var(--rust);
+}
+
+.empty-state {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty-state h3 {
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
