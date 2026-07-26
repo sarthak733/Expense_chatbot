@@ -86,13 +86,10 @@ func main() {
 	root = middleware.Recover(root)
 	root = middleware.CORS(root)
 
-	// 6. Add CORS so the frontend (e.g. localhost:5173) can reach the backend.
+	// 6. Add CORS so the frontend can reach the backend.
+	// AllowedOrigins is driven by the CORS_ALLOWED_ORIGINS env var in production.
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{
-			"http://localhost:5173", // Vite dev server
-			"http://localhost:4173", // Vite preview
-			"http://127.0.0.1:5173",
-		},
+		AllowedOrigins: middleware.AllowedOrigins(),
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{
 			"Authorization",
@@ -108,27 +105,6 @@ func main() {
 	})
 	root = c.Handler(root)
 
-	// 6. Add CORS so the frontend (e.g. localhost:5173) can reach the backend.
-	c := cors.New(cors.Options{
-		AllowedOrigins: []string{
-			"http://localhost:5173", // Vite dev server
-			"http://localhost:4173", // Vite preview
-			"http://127.0.0.1:5173",
-		},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders: []string{
-			"Authorization",
-			"Content-Type",
-			"Connect-Protocol-Version",
-			"Connect-Timeout-Ms",
-			"Connect-Accept-Encoding",
-			"Connect-Content-Encoding",
-			"Grpc-Timeout",
-			"X-Grpc-Web",
-		},
-		AllowCredentials: true,
-	})
-	root = c.Handler(root)
 
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,

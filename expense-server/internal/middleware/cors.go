@@ -6,11 +6,11 @@ import (
 	"strings"
 )
 
-// allowedOrigins is read from CORS_ALLOWED_ORIGINS (comma-separated), so
-// prod can lock this down without a code change. Defaults cover local
+// AllowedOrigins reads origins from CORS_ALLOWED_ORIGINS (comma-separated),
+// so prod can lock this down without a code change. Defaults cover local
 // frontend dev servers (Vite's default port, plus a couple of common
 // alternates).
-func allowedOrigins() []string {
+func AllowedOrigins() []string {
 	if v := os.Getenv("CORS_ALLOWED_ORIGINS"); v != "" {
 		parts := strings.Split(v, ",")
 		for i := range parts {
@@ -20,12 +20,13 @@ func allowedOrigins() []string {
 	}
 	return []string{
 		"http://localhost:5173",
+		"http://localhost:4173", // Vite preview
 		"http://127.0.0.1:5173",
 	}
 }
 
 func isAllowedOrigin(origin string) bool {
-	for _, o := range allowedOrigins() {
+	for _, o := range AllowedOrigins() {
 		if o == origin {
 			return true
 		}
