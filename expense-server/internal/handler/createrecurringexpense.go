@@ -49,18 +49,22 @@ func (h *Handler) CreateRecurringExpense(
 		dbCategoryID.Valid = true
 	}
 
-	// Fetch the user's current currency so it is stored with the recurring expense.
-	currency, _ := getUserCurrency(ctx, h.DB, userID)
+	// Read currency from request, fallback to user's profile currency
+	currency := strings.TrimSpace(req.Msg.Currency)
+	if currency == "" {
+		currency, _ = getUserCurrency(ctx, h.DB, userID)
+	}
 
 	query := `
 		INSERT INTO recurring_expenses (user_id, title, amount, category_id, interval, next_run_date, currency)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, created_at`
+		RETURNING id, created_at, currency`
 
 	var id int32
 	var createdAt time.Time
+	var dbCurrency string
 	err = h.DB.QueryRowContext(ctx, query, userID, req.Msg.Title, req.Msg.Amount, dbCategoryID, interval, nextRunDate, currency).
-		Scan(&id, &createdAt)
+		Scan(&id, &createdAt, &dbCurrency)
 	if err != nil {
 		log.Printf("ERROR inserting recurring expense: %v", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
@@ -79,6 +83,7 @@ func (h *Handler) CreateRecurringExpense(
 			NextRunDate: req.Msg.NextRunDate,
 			IsActive:    true,
 			CreatedAt:   formatTime(createdAt),
+			Currency:    dbCurrency,
 		},
 	}), nil
 }

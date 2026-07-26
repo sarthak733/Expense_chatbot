@@ -58,18 +58,22 @@ func (h *Handler) CreateBudget(
 		dbCategoryID.Valid = true
 	}
 
-	// Fetch user's current currency to store with the budget.
-	currency, _ := getUserCurrency(ctx, h.DB, userID)
+	// Read currency from request, fallback to user's profile currency
+	currency := strings.TrimSpace(req.Msg.Currency)
+	if currency == "" {
+		currency, _ = getUserCurrency(ctx, h.DB, userID)
+	}
 
 	query := `
 		INSERT INTO budgets (user_id, category_id, amount, period, start_date, end_date, currency)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, created_at`
+		RETURNING id, created_at, currency`
 
 	var id int32
 	var createdAt time.Time
+	var dbCurrency string
 	err = h.DB.QueryRowContext(ctx, query, userID, dbCategoryID, req.Msg.Amount, period, startDate, endDate, currency).
-		Scan(&id, &createdAt)
+		Scan(&id, &createdAt, &dbCurrency)
 	if err != nil {
 		log.Printf("ERROR inserting budget: %v", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
@@ -112,6 +116,7 @@ func (h *Handler) CreateBudget(
 			Remaining:  remaining,
 			Percentage: percentage,
 			Status:     status,
+			Currency:   dbCurrency,
 		},
 	}), nil
 }

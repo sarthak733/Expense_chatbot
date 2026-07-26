@@ -13,6 +13,46 @@ type ParsedExpense struct {
 	Amount   float64
 	Category string
 	Date     time.Time
+	Currency string // detected ISO 4217 code, or "" if not mentioned
+}
+
+// DetectCurrency attempts to extract an explicit currency from natural language text.
+// Returns the ISO 4217 code (e.g. "USD") or "" if nothing recognised.
+func DetectCurrency(text string) string {
+	lower := strings.ToLower(text)
+
+	currencyMap := []struct {
+		keywords []string
+		code     string
+	}{
+		{[]string{"usd", "dollar", "dollars", "buck", "bucks", "$"}, "USD"},
+		{[]string{"inr", "rupee", "rupees", "rs", "₹"}, "INR"},
+		{[]string{"eur", "euro", "euros", "€"}, "EUR"},
+		{[]string{"gbp", "pound", "pounds", "sterling", "£"}, "GBP"},
+		{[]string{"jpy", "yen", "¥"}, "JPY"},
+		{[]string{"cad", "canadian dollar", "ca$"}, "CAD"},
+		{[]string{"aud", "australian dollar", "a$"}, "AUD"},
+		{[]string{"sgd", "singapore dollar", "s$"}, "SGD"},
+		{[]string{"aed", "dirham", "dirhams"}, "AED"},
+		{[]string{"pkr", "pakistani rupee", "pakistani rupees"}, "PKR"},
+	}
+
+	for _, entry := range currencyMap {
+		for _, kw := range entry.keywords {
+			// Use word-boundary match for multi-char keywords, substring for symbols
+			if len([]rune(kw)) == 1 {
+				if strings.Contains(text, kw) {
+					return entry.code
+				}
+			} else {
+				rx := regexp.MustCompile(`(?i)\b` + regexp.QuoteMeta(kw) + `\b`)
+				if rx.MatchString(lower) {
+					return entry.code
+				}
+			}
+		}
+	}
+	return ""
 }
 
 // ParseText processes a natural language string and extracts expense metadata.
@@ -21,6 +61,7 @@ func ParseText(text string) ParsedExpense {
 	parsed := ParsedExpense{
 		Date:     now,
 		Category: "Others",
+		Currency: DetectCurrency(text),
 	}
 
 	// 1. Extract Amount
@@ -91,7 +132,7 @@ func ParseText(text string) ParsedExpense {
 	
 	// Remove amount match
 	if rawAmountMatch != "" {
-		cleaned = strings.Replace(cleaned, rawAmountMatch, "", 1)
+		cleaned = strings.Replace(cleaned, rawAmountMatch, " ", 1)
 	}
 	
 	// Remove date expressions
@@ -105,8 +146,18 @@ func ParseText(text string) ParsedExpense {
 		cleaned = rx.ReplaceAllString(cleaned, "")
 	}
 
+	// Remove currency words so they don't end up in the title
+	currencyPatterns := []string{
+		`\b(usd|inr|eur|gbp|jpy|cad|aud|sgd|aed|pkr)\b`,
+		`\b(dollars?|rupees?|euros?|pounds?|yen|bucks?|dirham|dirhams?)\b`,
+	}
+	for _, p := range currencyPatterns {
+		rx := regexp.MustCompile("(?i)" + p)
+		cleaned = rx.ReplaceAllString(cleaned, " ")
+	}
+
 	// Strip out filler words at the beginning/end
-	fillerRx := regexp.MustCompile(`(?i)\b(spent|buy|bought|paid|paying|for|on|at|a|an|the|some)\b`)
+	fillerRx := regexp.MustCompile(`(?i)\b(spent|buy|bought|paid|paying|for|on|at|a|an|the|some|in|of)\b`)
 	cleaned = fillerRx.ReplaceAllString(cleaned, " ")
 
 	// Cleanup whitespace
@@ -126,6 +177,7 @@ func ParseText(text string) ParsedExpense {
 
 	return parsed
 }
+
 
 func lastWeekday(dayStr string, relativeTo time.Time) time.Time {
 	wdMap := map[string]time.Weekday{
@@ -153,11 +205,42 @@ func classifyCategory(title string) string {
 	
 	// Keyword map
 	categoryKeywords := map[string][]string{
-		"Food":          {"coffee", "starbucks", "mcdonald", "lunch", "dinner", "pizza", "groceries", "food", "restaurant", "cafe", "burger", "tea", "drink", "swiggy", "zomato", "kfc"},
-		"Transport":     {"uber", "taxi", "bus", "train", "flight", "gas", "fuel", "subway", "metro", "ticket", "ride", "cab", "petrol", "diesel"},
-		"Utilities":     {"electricity", "rent", "water", "internet", "wifi", "electric", "bill", "phone", "mobile", "power", "subscription"},
-		"Entertainment": {"movie", "netflix", "spotify", "game", "concert", "theatre", "museum", "steam", "cinema", "play", "pub", "club", "drinks"},
-		"Shopping":      {"amazon", "clothes", "shoes", "shirt", "pants", "mall", "shopping", "store", "walmart", "target", "ebay", "myntra"},
+		"Food": {
+			"coffee", "starbucks", "mcdonald", "lunch", "dinner", "breakfast", "brunch", "pizza", 
+			"groceries", "grocery", "supermarket", "food", "restaurant", "cafe", "burger", "tea", 
+			"drink", "drinks", "swiggy", "zomato", "kfc", "dominos", "subway", "bakery", "milk", 
+			"bread", "eggs", "egg", "chicken", "meat", "fish", "rice", "wheat", "flour", "sugar", 
+			"salt", "oil", "butter", "cheese", "snack", "snacks", "biscuit", "biscuits", "chocolate", 
+			"candy", "juice", "soda", "brinjal", "eggplant", "vegetable", "vegetables", "fruit", "fruits",
+			"apple", "banana", "beer", "wine", "liquor", "booze", "croissant", "croissants", "bruschetta",
+			"pasta", "spaghetti", "lasagna", "salad", "soup", "steak", "sushi", "taco", "tacos",
+			"burrito", "nachos", "curry", "naan", "roti", "biryani", "noodles", "ramen", "sandwich",
+			"sandwiches", "waffle", "pancake", "toast", "bacon", "sausage", "donut", "donuts",
+			"muffin", "cake", "pastry", "cookie", "cookies", "ice cream", "dessert", "chowmein",
+			"chow mein", "momo", "momos", "maggi", "samosa", "paneer", "tandoori", "kabab", "kebab", "tikka",
+		},
+		"Transport": {
+			"uber", "lyft", "taxi", "cab", "cabs", "bus", "train", "flight", "flights", "plane", 
+			"gas", "fuel", "subway", "metro", "ticket", "tickets", "ride", "commute", "parking", 
+			"toll", "tolls", "fare", "petrol", "diesel",
+		},
+		"Utilities": {
+			"electricity", "rent", "water", "internet", "wifi", "electric", "bill", "bills", 
+			"phone", "mobile", "power", "subscription", "subscriptions", "sewer", "trash", 
+			"garbage", "heating", "insurance",
+		},
+		"Entertainment": {
+			"movie", "movies", "cinema", "netflix", "spotify", "youtube premium", "icloud", 
+			"google one", "game", "games", "gaming", "steam", "xbox", "playstation", "nintendo", 
+			"concert", "concerts", "gig", "theatre", "museum", "play", "pub", "pubs", "club", 
+			"clubs", "bar", "bars", "party", "parties", "show", "shows",
+		},
+		"Shopping": {
+			"amazon", "ebay", "walmart", "target", "myntra", "flipkart", "clothes", "clothing", 
+			"shoes", "shoe", "shirt", "pants", "jeans", "jacket", "dress", "mall", "shopping", 
+			"store", "boutique", "gift", "gifts", "toy", "toys", "electronics", "gadget", 
+			"gadgets", "furniture",
+		},
 	}
 
 	for cat, keywords := range categoryKeywords {

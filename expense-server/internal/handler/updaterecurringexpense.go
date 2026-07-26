@@ -48,11 +48,26 @@ func (h *Handler) UpdateRecurringExpense(
 		dbCategoryID.Valid = true
 	}
 
-	query := `
-		UPDATE recurring_expenses
-		SET title = $1, amount = $2, category_id = $3, interval = $4, next_run_date = $5, is_active = $6
-		WHERE id = $7 AND user_id = $8
-		RETURNING id, user_id, title, amount, category_id, interval, next_run_date, last_run_date, is_active, created_at`
+	currency := strings.TrimSpace(req.Msg.Currency)
+
+	var query string
+	var args []interface{}
+
+	if currency != "" {
+		query = `
+			UPDATE recurring_expenses
+			SET title = $1, amount = $2, category_id = $3, interval = $4, next_run_date = $5, is_active = $6, currency = $7
+			WHERE id = $8 AND user_id = $9
+			RETURNING id, user_id, title, amount, category_id, interval, next_run_date, last_run_date, is_active, created_at, currency`
+		args = []interface{}{req.Msg.Title, req.Msg.Amount, dbCategoryID, interval, nextRunDate, req.Msg.IsActive, currency, req.Msg.Id, userID}
+	} else {
+		query = `
+			UPDATE recurring_expenses
+			SET title = $1, amount = $2, category_id = $3, interval = $4, next_run_date = $5, is_active = $6
+			WHERE id = $7 AND user_id = $8
+			RETURNING id, user_id, title, amount, category_id, interval, next_run_date, last_run_date, is_active, created_at, currency`
+		args = []interface{}{req.Msg.Title, req.Msg.Amount, dbCategoryID, interval, nextRunDate, req.Msg.IsActive, req.Msg.Id, userID}
+	}
 
 	var (
 		r             expensev1.RecurringExpense
@@ -62,8 +77,8 @@ func (h *Handler) UpdateRecurringExpense(
 		createdAt     time.Time
 	)
 
-	err = h.DB.QueryRowContext(ctx, query, req.Msg.Title, req.Msg.Amount, dbCategoryID, interval, nextRunDate, req.Msg.IsActive, req.Msg.Id, userID).
-		Scan(&r.Id, &r.UserId, &r.Title, &r.Amount, &resCategoryID, &r.Interval, &resNextRun, &lastRun, &r.IsActive, &createdAt)
+	err = h.DB.QueryRowContext(ctx, query, args...).
+		Scan(&r.Id, &r.UserId, &r.Title, &r.Amount, &resCategoryID, &r.Interval, &resNextRun, &lastRun, &r.IsActive, &createdAt, &r.Currency)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

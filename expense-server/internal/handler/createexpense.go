@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -26,26 +27,30 @@ func (h *Handler) CreateExpense(
 	}
 
 	// Resolve the category
-	catID, catName, err := h.resolveCategory(ctx, userID, req.Msg.CategoryId, req.Msg.Category)
+	catID, catName, err := h.resolveCategory(ctx, userID, req.Msg.CategoryId, req.Msg.Category, req.Msg.Title)
 	if err != nil {
 		log.Printf("ERROR resolving category: %v", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
 	}
 
-	// Fetch the user's current currency so it is stored with the expense.
-	currency, _ := getUserCurrency(ctx, h.DB, userID)
+	// Read currency from request, fallback to user's profile currency
+	currency := strings.TrimSpace(req.Msg.Currency)
+	if currency == "" {
+		currency, _ = getUserCurrency(ctx, h.DB, userID)
+	}
 
 	query := `
 		INSERT INTO expenses (user_id, title, amount, category, category_id, currency)
 		VALUES ($1, $2, $3, $4, $5, $6)
-		RETURNING id, created_at`
+		RETURNING id, created_at, currency`
 
 	var (
-		id        int
-		createdAt time.Time
+		id         int
+		createdAt  time.Time
+		dbCurrency string
 	)
 	err = h.DB.QueryRowContext(ctx, query, userID, req.Msg.Title, req.Msg.Amount, catName, catID, currency).
-		Scan(&id, &createdAt)
+		Scan(&id, &createdAt, &dbCurrency)
 	if err != nil {
 		log.Printf("ERROR inserting expense: %v", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
@@ -61,6 +66,7 @@ func (h *Handler) CreateExpense(
 			Category:   catName,
 			CategoryId: catID,
 			CreatedAt:  formatTime(createdAt),
+			Currency:   dbCurrency,
 		},
 	}), nil
 }

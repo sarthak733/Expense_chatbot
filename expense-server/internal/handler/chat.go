@@ -16,22 +16,6 @@ import (
 	"expense-server/internal/nlp"
 )
 
-// currencySymbol maps a currency code to its display symbol for chat
-// replies. Falls back to the code itself (e.g. "AUD ") if unrecognized.
-func currencySymbol(code string) string {
-	switch code {
-	case "INR":
-		return "₹"
-	case "USD":
-		return "$"
-	case "EUR":
-		return "€"
-	case "GBP":
-		return "£"
-	default:
-		return code + " "
-	}
-}
 
 // SendChatMessage logs a user's natural language message, parses it to execute expense commands if possible,
 // and returns both the logged message and the assistant's reply.
@@ -51,7 +35,6 @@ func (h *Handler) SendChatMessage(
 	if err := h.DB.QueryRowContext(ctx, `SELECT currency FROM users WHERE id = $1`, userID).Scan(&userCurrency); err != nil {
 		userCurrency = "USD" // fall back to the column default if the lookup fails
 	}
-	symbol := currencySymbol(userCurrency)
 
 	userText := strings.TrimSpace(req.Msg.MessageText)
 	if userText == "" {
@@ -74,28 +57,35 @@ func (h *Handler) SendChatMessage(
 	var botReply string
 
 	if parsed.Amount > 0 {
+		// Resolve currency: prefer what the user mentioned in the text, fallback to their profile
+		expenseCurrency := parsed.Currency
+		if expenseCurrency == "" {
+			expenseCurrency = userCurrency
+		}
+		expenseSymbol := currencySymbol(expenseCurrency)
+
 		// Attempt to resolve and create the expense
-		catID, catName, err := h.resolveCategory(ctx, userID, 0, parsed.Category)
+		catID, catName, err := h.resolveCategory(ctx, userID, 0, parsed.Category, parsed.Title)
 		if err != nil {
 			log.Printf("ERROR resolving category in Chatbot QuickAdd: %v", err)
-			botReply = fmt.Sprintf("I parsed an expense of %s%.2f for '%s', but failed to resolve the category due to a database error.", symbol, parsed.Amount, parsed.Title)
+			botReply = fmt.Sprintf("I parsed an expense of %s%.2f for '%s', but failed to resolve the category due to a database error.", expenseSymbol, parsed.Amount, parsed.Title)
 		} else {
 			// Insert the expense into database
 			query := `
-				INSERT INTO expenses (user_id, title, amount, category, category_id, created_at)
-				VALUES ($1, $2, $3, $4, $5, $6)
+				INSERT INTO expenses (user_id, title, amount, category, category_id, created_at, currency)
+				VALUES ($1, $2, $3, $4, $5, $6, $7)
 				RETURNING id, created_at`
 
 			var expenseID int32
 			var createdAt time.Time
-			err = h.DB.QueryRowContext(ctx, query, userID, parsed.Title, parsed.Amount, catName, catID, parsed.Date).
+			err = h.DB.QueryRowContext(ctx, query, userID, parsed.Title, parsed.Amount, catName, catID, parsed.Date, expenseCurrency).
 				Scan(&expenseID, &createdAt)
 
 			if err != nil {
 				log.Printf("ERROR inserting expense in Chatbot: %v", err)
-				botReply = fmt.Sprintf("I parsed an expense of %s%.2f for '%s', but failed to save it to the database.", symbol, parsed.Amount, parsed.Title)
+				botReply = fmt.Sprintf("I parsed an expense of %s%.2f for '%s', but failed to save it to the database.", expenseSymbol, parsed.Amount, parsed.Title)
 			} else {
-				botReply = fmt.Sprintf("Successfully logged an expense: %s%.2f for '%s' in category '%s'.", symbol, parsed.Amount, parsed.Title, catName)
+				botReply = fmt.Sprintf("Successfully logged an expense: %s%.2f for '%s' in category '%s'.", expenseSymbol, parsed.Amount, parsed.Title, catName)
 			}
 		}
 	} else {

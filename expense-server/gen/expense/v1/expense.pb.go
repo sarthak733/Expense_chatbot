@@ -30,6 +30,7 @@ type Expense struct {
 	Category      string                 `protobuf:"bytes,5,opt,name=category,proto3" json:"category,omitempty"`                        // Category name (stored for display)
 	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`     // RFC 3339 formatted timestamp
 	CategoryId    int32                  `protobuf:"varint,7,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"` // Category ID in database
+	Currency      string                 `protobuf:"bytes,8,opt,name=currency,proto3" json:"currency,omitempty"`                        // Currency code (e.g. "USD", "INR")
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -113,12 +114,20 @@ func (x *Expense) GetCategoryId() int32 {
 	return 0
 }
 
+func (x *Expense) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
 type CreateExpenseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	Amount        float64                `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
 	Category      string                 `protobuf:"bytes,3,opt,name=category,proto3" json:"category,omitempty"`                        // Optional category name
 	CategoryId    int32                  `protobuf:"varint,4,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"` // Optional category ID
+	Currency      string                 `protobuf:"bytes,5,opt,name=currency,proto3" json:"currency,omitempty"`                        // Optional currency code (defaults to user's profile currency)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -179,6 +188,13 @@ func (x *CreateExpenseRequest) GetCategoryId() int32 {
 		return x.CategoryId
 	}
 	return 0
+}
+
+func (x *CreateExpenseRequest) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
 }
 
 type CreateExpenseResponse struct {
@@ -464,6 +480,7 @@ type UpdateExpenseRequest struct {
 	Amount        float64                `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
 	Category      string                 `protobuf:"bytes,4,opt,name=category,proto3" json:"category,omitempty"`
 	CategoryId    int32                  `protobuf:"varint,5,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
+	Currency      string                 `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"` // Optional currency code
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -531,6 +548,13 @@ func (x *UpdateExpenseRequest) GetCategoryId() int32 {
 		return x.CategoryId
 	}
 	return 0
+}
+
+func (x *UpdateExpenseRequest) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
 }
 
 type UpdateExpenseResponse struct {
@@ -1147,7 +1171,8 @@ type Budget struct {
 	Spent         float64 `protobuf:"fixed64,9,opt,name=spent,proto3" json:"spent,omitempty"`
 	Remaining     float64 `protobuf:"fixed64,10,opt,name=remaining,proto3" json:"remaining,omitempty"`
 	Percentage    float64 `protobuf:"fixed64,11,opt,name=percentage,proto3" json:"percentage,omitempty"`
-	Status        string  `protobuf:"bytes,12,opt,name=status,proto3" json:"status,omitempty"` // "green", "warning", "exceeded"
+	Status        string  `protobuf:"bytes,12,opt,name=status,proto3" json:"status,omitempty"`     // "green", "warning", "exceeded"
+	Currency      string  `protobuf:"bytes,13,opt,name=currency,proto3" json:"currency,omitempty"` // Budget currency
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1266,6 +1291,13 @@ func (x *Budget) GetStatus() string {
 	return ""
 }
 
+func (x *Budget) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
 type CreateBudgetRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CategoryId    int32                  `protobuf:"varint,1,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"` // 0 for overall
@@ -1273,6 +1305,7 @@ type CreateBudgetRequest struct {
 	Period        string                 `protobuf:"bytes,3,opt,name=period,proto3" json:"period,omitempty"`                        // "weekly", "monthly", "yearly"
 	StartDate     string                 `protobuf:"bytes,4,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"` // YYYY-MM-DD
 	EndDate       string                 `protobuf:"bytes,5,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`       // YYYY-MM-DD
+	Currency      string                 `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`                    // Optional currency code
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1338,6 +1371,13 @@ func (x *CreateBudgetRequest) GetStartDate() string {
 func (x *CreateBudgetRequest) GetEndDate() string {
 	if x != nil {
 		return x.EndDate
+	}
+	return ""
+}
+
+func (x *CreateBudgetRequest) GetCurrency() string {
+	if x != nil {
+		return x.Currency
 	}
 	return ""
 }
@@ -1481,6 +1521,7 @@ type UpdateBudgetRequest struct {
 	Amount        float64                `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
 	StartDate     string                 `protobuf:"bytes,4,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
 	EndDate       string                 `protobuf:"bytes,5,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	Currency      string                 `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"` // Optional currency code
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1546,6 +1587,13 @@ func (x *UpdateBudgetRequest) GetStartDate() string {
 func (x *UpdateBudgetRequest) GetEndDate() string {
 	if x != nil {
 		return x.EndDate
+	}
+	return ""
+}
+
+func (x *UpdateBudgetRequest) GetCurrency() string {
+	if x != nil {
+		return x.Currency
 	}
 	return ""
 }
@@ -1703,6 +1751,7 @@ type RecurringExpense struct {
 	LastRunDate   string                 `protobuf:"bytes,9,opt,name=last_run_date,json=lastRunDate,proto3" json:"last_run_date,omitempty"` // YYYY-MM-DD (empty if never run)
 	IsActive      bool                   `protobuf:"varint,10,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Currency      string                 `protobuf:"bytes,12,opt,name=currency,proto3" json:"currency,omitempty"` // Recurring expense currency
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1814,6 +1863,13 @@ func (x *RecurringExpense) GetCreatedAt() string {
 	return ""
 }
 
+func (x *RecurringExpense) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
 type CreateRecurringExpenseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
@@ -1821,6 +1877,7 @@ type CreateRecurringExpenseRequest struct {
 	CategoryId    int32                  `protobuf:"varint,3,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
 	Interval      string                 `protobuf:"bytes,4,opt,name=interval,proto3" json:"interval,omitempty"`                            // "daily", "weekly", "monthly", "yearly"
 	NextRunDate   string                 `protobuf:"bytes,5,opt,name=next_run_date,json=nextRunDate,proto3" json:"next_run_date,omitempty"` // YYYY-MM-DD
+	Currency      string                 `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`                            // Optional currency code
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1886,6 +1943,13 @@ func (x *CreateRecurringExpenseRequest) GetInterval() string {
 func (x *CreateRecurringExpenseRequest) GetNextRunDate() string {
 	if x != nil {
 		return x.NextRunDate
+	}
+	return ""
+}
+
+func (x *CreateRecurringExpenseRequest) GetCurrency() string {
+	if x != nil {
+		return x.Currency
 	}
 	return ""
 }
@@ -2031,6 +2095,7 @@ type UpdateRecurringExpenseRequest struct {
 	Interval      string                 `protobuf:"bytes,5,opt,name=interval,proto3" json:"interval,omitempty"`
 	NextRunDate   string                 `protobuf:"bytes,6,opt,name=next_run_date,json=nextRunDate,proto3" json:"next_run_date,omitempty"`
 	IsActive      bool                   `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	Currency      string                 `protobuf:"bytes,8,opt,name=currency,proto3" json:"currency,omitempty"` // Optional currency code
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2112,6 +2177,13 @@ func (x *UpdateRecurringExpenseRequest) GetIsActive() bool {
 		return x.IsActive
 	}
 	return false
+}
+
+func (x *UpdateRecurringExpenseRequest) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
 }
 
 type UpdateRecurringExpenseResponse struct {
@@ -3087,7 +3159,7 @@ var File_expense_v1_expense_proto protoreflect.FileDescriptor
 const file_expense_v1_expense_proto_rawDesc = "" +
 	"\n" +
 	"\x18expense/v1/expense.proto\x12\n" +
-	"expense.v1\"\xbc\x01\n" +
+	"expense.v1\"\xd8\x01\n" +
 	"\aExpense\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x05R\x06userId\x12\x14\n" +
@@ -3097,13 +3169,15 @@ const file_expense_v1_expense_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x1f\n" +
 	"\vcategory_id\x18\a \x01(\x05R\n" +
-	"categoryId\"\x81\x01\n" +
+	"categoryId\x12\x1a\n" +
+	"\bcurrency\x18\b \x01(\tR\bcurrency\"\x9d\x01\n" +
 	"\x14CreateExpenseRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x16\n" +
 	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x1a\n" +
 	"\bcategory\x18\x03 \x01(\tR\bcategory\x12\x1f\n" +
 	"\vcategory_id\x18\x04 \x01(\x05R\n" +
-	"categoryId\"`\n" +
+	"categoryId\x12\x1a\n" +
+	"\bcurrency\x18\x05 \x01(\tR\bcurrency\"`\n" +
 	"\x15CreateExpenseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12-\n" +
 	"\aexpense\x18\x02 \x01(\v2\x13.expense.v1.ExpenseR\aexpense\"#\n" +
@@ -3122,14 +3196,15 @@ const file_expense_v1_expense_proto_rawDesc = "" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12/\n" +
 	"\bexpenses\x18\x02 \x03(\v2\x13.expense.v1.ExpenseR\bexpenses\x12\x1f\n" +
 	"\vtotal_count\x18\x03 \x01(\x05R\n" +
-	"totalCount\"\x91\x01\n" +
+	"totalCount\"\xad\x01\n" +
 	"\x14UpdateExpenseRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x16\n" +
 	"\x06amount\x18\x03 \x01(\x01R\x06amount\x12\x1a\n" +
 	"\bcategory\x18\x04 \x01(\tR\bcategory\x12\x1f\n" +
 	"\vcategory_id\x18\x05 \x01(\x05R\n" +
-	"categoryId\"`\n" +
+	"categoryId\x12\x1a\n" +
+	"\bcurrency\x18\x06 \x01(\tR\bcurrency\"`\n" +
 	"\x15UpdateExpenseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12-\n" +
 	"\aexpense\x18\x02 \x01(\v2\x13.expense.v1.ExpenseR\aexpense\"&\n" +
@@ -3165,7 +3240,7 @@ const file_expense_v1_expense_proto_rawDesc = "" +
 	"\x15DeleteCategoryRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\"2\n" +
 	"\x16DeleteCategoryResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"\xc7\x02\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\xe3\x02\n" +
 	"\x06Budget\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x05R\x06userId\x12\x1f\n" +
@@ -3184,7 +3259,8 @@ const file_expense_v1_expense_proto_rawDesc = "" +
 	"\n" +
 	"percentage\x18\v \x01(\x01R\n" +
 	"percentage\x12\x16\n" +
-	"\x06status\x18\f \x01(\tR\x06status\"\xa0\x01\n" +
+	"\x06status\x18\f \x01(\tR\x06status\x12\x1a\n" +
+	"\bcurrency\x18\r \x01(\tR\bcurrency\"\xbc\x01\n" +
 	"\x13CreateBudgetRequest\x12\x1f\n" +
 	"\vcategory_id\x18\x01 \x01(\x05R\n" +
 	"categoryId\x12\x16\n" +
@@ -3192,13 +3268,14 @@ const file_expense_v1_expense_proto_rawDesc = "" +
 	"\x06period\x18\x03 \x01(\tR\x06period\x12\x1d\n" +
 	"\n" +
 	"start_date\x18\x04 \x01(\tR\tstartDate\x12\x19\n" +
-	"\bend_date\x18\x05 \x01(\tR\aendDate\"\\\n" +
+	"\bend_date\x18\x05 \x01(\tR\aendDate\x12\x1a\n" +
+	"\bcurrency\x18\x06 \x01(\tR\bcurrency\"\\\n" +
 	"\x14CreateBudgetResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12*\n" +
 	"\x06budget\x18\x02 \x01(\v2\x12.expense.v1.BudgetR\x06budget\"\x14\n" +
 	"\x12ListBudgetsRequest\"C\n" +
 	"\x13ListBudgetsResponse\x12,\n" +
-	"\abudgets\x18\x01 \x03(\v2\x12.expense.v1.BudgetR\abudgets\"\x98\x01\n" +
+	"\abudgets\x18\x01 \x03(\v2\x12.expense.v1.BudgetR\abudgets\"\xb4\x01\n" +
 	"\x13UpdateBudgetRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x1f\n" +
 	"\vcategory_id\x18\x02 \x01(\x05R\n" +
@@ -3206,14 +3283,15 @@ const file_expense_v1_expense_proto_rawDesc = "" +
 	"\x06amount\x18\x03 \x01(\x01R\x06amount\x12\x1d\n" +
 	"\n" +
 	"start_date\x18\x04 \x01(\tR\tstartDate\x12\x19\n" +
-	"\bend_date\x18\x05 \x01(\tR\aendDate\"\\\n" +
+	"\bend_date\x18\x05 \x01(\tR\aendDate\x12\x1a\n" +
+	"\bcurrency\x18\x06 \x01(\tR\bcurrency\"\\\n" +
 	"\x14UpdateBudgetResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12*\n" +
 	"\x06budget\x18\x02 \x01(\v2\x12.expense.v1.BudgetR\x06budget\"%\n" +
 	"\x13DeleteBudgetRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\"0\n" +
 	"\x14DeleteBudgetResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"\xc6\x02\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\xe2\x02\n" +
 	"\x10RecurringExpense\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x05R\x06userId\x12\x14\n" +
@@ -3228,20 +3306,22 @@ const file_expense_v1_expense_proto_rawDesc = "" +
 	"\tis_active\x18\n" +
 	" \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\v \x01(\tR\tcreatedAt\"\xae\x01\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAt\x12\x1a\n" +
+	"\bcurrency\x18\f \x01(\tR\bcurrency\"\xca\x01\n" +
 	"\x1dCreateRecurringExpenseRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x16\n" +
 	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x1f\n" +
 	"\vcategory_id\x18\x03 \x01(\x05R\n" +
 	"categoryId\x12\x1a\n" +
 	"\binterval\x18\x04 \x01(\tR\binterval\x12\"\n" +
-	"\rnext_run_date\x18\x05 \x01(\tR\vnextRunDate\"\x85\x01\n" +
+	"\rnext_run_date\x18\x05 \x01(\tR\vnextRunDate\x12\x1a\n" +
+	"\bcurrency\x18\x06 \x01(\tR\bcurrency\"\x85\x01\n" +
 	"\x1eCreateRecurringExpenseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12I\n" +
 	"\x11recurring_expense\x18\x02 \x01(\v2\x1c.expense.v1.RecurringExpenseR\x10recurringExpense\"\x1e\n" +
 	"\x1cListRecurringExpensesRequest\"l\n" +
 	"\x1dListRecurringExpensesResponse\x12K\n" +
-	"\x12recurring_expenses\x18\x01 \x03(\v2\x1c.expense.v1.RecurringExpenseR\x11recurringExpenses\"\xdb\x01\n" +
+	"\x12recurring_expenses\x18\x01 \x03(\v2\x1c.expense.v1.RecurringExpenseR\x11recurringExpenses\"\xf7\x01\n" +
 	"\x1dUpdateRecurringExpenseRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x16\n" +
@@ -3250,7 +3330,8 @@ const file_expense_v1_expense_proto_rawDesc = "" +
 	"categoryId\x12\x1a\n" +
 	"\binterval\x18\x05 \x01(\tR\binterval\x12\"\n" +
 	"\rnext_run_date\x18\x06 \x01(\tR\vnextRunDate\x12\x1b\n" +
-	"\tis_active\x18\a \x01(\bR\bisActive\"\x85\x01\n" +
+	"\tis_active\x18\a \x01(\bR\bisActive\x12\x1a\n" +
+	"\bcurrency\x18\b \x01(\tR\bcurrency\"\x85\x01\n" +
 	"\x1eUpdateRecurringExpenseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12I\n" +
 	"\x11recurring_expense\x18\x02 \x01(\v2\x1c.expense.v1.RecurringExpenseR\x10recurringExpense\"/\n" +

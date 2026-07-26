@@ -23,7 +23,7 @@ func (h *Handler) ListRecurringExpenses(
 	}
 
 	query := `
-		SELECT r.id, r.user_id, r.title, r.amount, r.category_id, COALESCE(c.name, 'Others'), r.interval, r.next_run_date, r.last_run_date, r.is_active, r.created_at
+		SELECT r.id, r.user_id, r.title, r.amount, r.category_id, COALESCE(c.name, 'Others'), r.interval, r.next_run_date, r.last_run_date, r.is_active, r.created_at, r.currency
 		FROM recurring_expenses r
 		LEFT JOIN categories c ON r.category_id = c.id
 		WHERE r.user_id = $1
@@ -46,7 +46,7 @@ func (h *Handler) ListRecurringExpenses(
 			createdAt   time.Time
 		)
 
-		if err := rows.Scan(&r.Id, &r.UserId, &r.Title, &r.Amount, &catID, &r.Category, &r.Interval, &nextRun, &lastRun, &r.IsActive, &createdAt); err != nil {
+		if err := rows.Scan(&r.Id, &r.UserId, &r.Title, &r.Amount, &catID, &r.Category, &r.Interval, &nextRun, &lastRun, &r.IsActive, &createdAt, &r.Currency); err != nil {
 			log.Printf("ERROR scanning recurring expense: %v", err)
 			return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
 		}

@@ -16,6 +16,7 @@ message Expense {
   string category    = 5; // Category name (stored for display)
   string created_at  = 6; // RFC 3339 formatted timestamp
   int32  category_id = 7; // Category ID in database
+  string currency    = 8; // Currency code (e.g. "USD", "INR")
 }
 
 // ---------------------------------------------------------------------------
@@ -28,6 +29,7 @@ message CreateExpenseRequest {
   double amount      = 2;
   string category    = 3; // Optional category name
   int32  category_id = 4; // Optional category ID
+  string currency    = 5; // Optional currency code (defaults to user's profile currency)
 }
 
 message CreateExpenseResponse {
@@ -77,6 +79,7 @@ message UpdateExpenseRequest {
   double amount      = 3;
   string category    = 4;
   int32  category_id = 5;
+  string currency    = 6; // Optional currency code
 }
 
 message UpdateExpenseResponse {
@@ -163,6 +166,7 @@ message Budget {
   double remaining   = 10;
   double percentage  = 11;
   string status      = 12; // "green", "warning", "exceeded"
+  string currency    = 13; // Budget currency
 }
 
 message CreateBudgetRequest {
@@ -171,6 +175,7 @@ message CreateBudgetRequest {
   string period      = 3; // "weekly", "monthly", "yearly"
   string start_date  = 4; // YYYY-MM-DD
   string end_date    = 5; // YYYY-MM-DD
+  string currency    = 6; // Optional currency code
 }
 
 message CreateBudgetResponse {
@@ -190,6 +195,7 @@ message UpdateBudgetRequest {
   double amount      = 3;
   string start_date  = 4;
   string end_date    = 5;
+  string currency    = 6; // Optional currency code
 }
 
 message UpdateBudgetResponse {
@@ -221,6 +227,7 @@ message RecurringExpense {
   string last_run_date  = 9; // YYYY-MM-DD (empty if never run)
   bool   is_active      = 10;
   string created_at     = 11;
+  string currency       = 12; // Recurring expense currency
 }
 
 message CreateRecurringExpenseRequest {
@@ -229,6 +236,7 @@ message CreateRecurringExpenseRequest {
   int32  category_id    = 3;
   string interval       = 4; // "daily", "weekly", "monthly", "yearly"
   string next_run_date  = 5; // YYYY-MM-DD
+  string currency       = 6; // Optional currency code
 }
 
 message CreateRecurringExpenseResponse {
@@ -250,6 +258,7 @@ message UpdateRecurringExpenseRequest {
   string interval       = 5;
   string next_run_date  = 6;
   bool   is_active      = 7;
+  string currency       = 8; // Optional currency code
 }
 
 message UpdateRecurringExpenseResponse {

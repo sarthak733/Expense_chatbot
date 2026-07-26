@@ -22,8 +22,25 @@ func formatTime(t time.Time) string {
 // ---------------------------------------------------------------------------
 
 // resolveCategory retrieves or creates a category based on the input name/ID.
-func (h *Handler) resolveCategory(ctx context.Context, userID int, categoryID int32, categoryName string) (int32, string, error) {
+func (h *Handler) resolveCategory(ctx context.Context, userID int, categoryID int32, categoryName string, title string) (int32, string, error) {
 	categoryName = strings.TrimSpace(categoryName)
+	title = strings.TrimSpace(title)
+
+	// Case 0: If categoryName is empty or "Others", check if this user has previously categorized an expense with this exact title.
+	if (categoryID <= 0 && (categoryName == "" || categoryName == "Others")) && title != "" {
+		var histCatID int32
+		var histCatName string
+		query := `
+			SELECT category_id, category 
+			FROM expenses 
+			WHERE user_id = $1 AND LOWER(title) = LOWER($2) AND category_id IS NOT NULL AND category IS NOT NULL
+			ORDER BY created_at DESC 
+			LIMIT 1`
+		err := h.DB.QueryRowContext(ctx, query, userID, title).Scan(&histCatID, &histCatName)
+		if err == nil && histCatID > 0 && histCatName != "" {
+			return histCatID, histCatName, nil
+		}
+	}
 
 	// Case 1: category_id is explicitly provided and valid
 	if categoryID > 0 {

@@ -28,14 +28,17 @@ func (h *Handler) QuickAddExpense(
 	}
 
 	// Resolve/Create the category
-	catID, catName, err := h.resolveCategory(ctx, userID, 0, parsed.Category)
+	catID, catName, err := h.resolveCategory(ctx, userID, 0, parsed.Category, parsed.Title)
 	if err != nil {
 		log.Printf("ERROR resolving category in QuickAdd: %v", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
 	}
 
-	// Fetch the user's current currency so it is stored with the expense.
-	currency, _ := getUserCurrency(ctx, h.DB, userID)
+	// Use currency detected from the input text; fallback to user's profile currency.
+	currency := parsed.Currency
+	if currency == "" {
+		currency, _ = getUserCurrency(ctx, h.DB, userID)
+	}
 
 	query := `
 		INSERT INTO expenses (user_id, title, amount, category, category_id, created_at, currency)
@@ -61,6 +64,7 @@ func (h *Handler) QuickAddExpense(
 			Category:   catName,
 			CategoryId: catID,
 			CreatedAt:  formatTime(createdAt),
+			Currency:   currency,
 		},
 	}), nil
 }

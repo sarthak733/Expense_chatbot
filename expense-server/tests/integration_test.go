@@ -464,3 +464,185 @@ func TestUserProfileFlow(t *testing.T) {
 	}
 	respGetGone.Body.Close()
 }
+
+func TestMultiCurrencyFlow(t *testing.T) {
+	server, db, entClient := setupTestServer(t)
+	defer server.Close()
+	defer entClient.Close()
+	defer db.Close()
+
+	// 1. Register User
+	registerPayload, _ := json.Marshal(map[string]string{
+		"username": "currency_tester",
+		"password": "password123",
+	})
+	resp, _ := http.Post(
+		fmt.Sprintf("%s/expense.v1.AuthService/Register", server.URL),
+		"application/json",
+		bytes.NewBuffer(registerPayload),
+	)
+	var registerRes map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&registerRes)
+	resp.Body.Close()
+	token := registerRes["token"].(string)
+
+	client := &http.Client{}
+
+	// 2. Create Expense in INR
+	expINR, _ := json.Marshal(map[string]interface{}{
+		"title":    "Lunch in Delhi",
+		"amount":   250.00,
+		"currency": "INR",
+	})
+	req1, _ := http.NewRequest("POST", fmt.Sprintf("%s/expense.v1.ExpenseService/CreateExpense", server.URL), bytes.NewBuffer(expINR))
+	req1.Header.Set("Content-Type", "application/json")
+	req1.Header.Set("Authorization", "Bearer "+token)
+	resp1, err := client.Do(req1)
+	if err != nil {
+		t.Fatalf("create expense INR failed: %v", err)
+	}
+	var res1 map[string]interface{}
+	json.NewDecoder(resp1.Body).Decode(&res1)
+	resp1.Body.Close()
+	expenseINR := res1["expense"].(map[string]interface{})
+	if expenseINR["currency"] != "INR" {
+		t.Errorf("expected created expense currency to be INR, got %v", expenseINR["currency"])
+	}
+
+	// 3. Create Expense in USD
+	expUSD, _ := json.Marshal(map[string]interface{}{
+		"title":    "Lunch in NY",
+		"amount":   15.50,
+		"currency": "USD",
+	})
+	req2, _ := http.NewRequest("POST", fmt.Sprintf("%s/expense.v1.ExpenseService/CreateExpense", server.URL), bytes.NewBuffer(expUSD))
+	req2.Header.Set("Content-Type", "application/json")
+	req2.Header.Set("Authorization", "Bearer "+token)
+	resp2, err := client.Do(req2)
+	if err != nil {
+		t.Fatalf("create expense USD failed: %v", err)
+	}
+	var res2 map[string]interface{}
+	json.NewDecoder(resp2.Body).Decode(&res2)
+	resp2.Body.Close()
+	expenseUSD := res2["expense"].(map[string]interface{})
+	if expenseUSD["currency"] != "USD" {
+		t.Errorf("expected created expense currency to be USD, got %v", expenseUSD["currency"])
+	}
+
+	// 4. Update Profile Preferred Currency to EUR
+	updateProfile, _ := json.Marshal(map[string]interface{}{
+		"currency": "EUR",
+	})
+	req3, _ := http.NewRequest("POST", fmt.Sprintf("%s/expense.v1.UserService/UpdateProfile", server.URL), bytes.NewBuffer(updateProfile))
+	req3.Header.Set("Content-Type", "application/json")
+	req3.Header.Set("Authorization", "Bearer "+token)
+	resp3, err := client.Do(req3)
+	if err != nil {
+		t.Fatalf("update profile failed: %v", err)
+	}
+	resp3.Body.Close()
+
+	// 5. Get List of Expenses and verify currencies are unchanged
+	req4, _ := http.NewRequest("POST", fmt.Sprintf("%s/expense.v1.ExpenseService/ListExpenses", server.URL), bytes.NewBuffer([]byte("{}")))
+	req4.Header.Set("Content-Type", "application/json")
+	req4.Header.Set("Authorization", "Bearer "+token)
+	resp4, err := client.Do(req4)
+	if err != nil {
+		t.Fatalf("list expenses failed: %v", err)
+	}
+	var res4 map[string]interface{}
+	json.NewDecoder(resp4.Body).Decode(&res4)
+	resp4.Body.Close()
+
+	expenses := res4["expenses"].([]interface{})
+	if len(expenses) != 2 {
+		t.Fatalf("expected 2 expenses, got %d", len(expenses))
+	}
+
+	// List retrieves in descending order of created_at. Since USD was created second, it is first in the list.
+	firstExp := expenses[0].(map[string]interface{})
+	secondExp := expenses[1].(map[string]interface{})
+
+	if firstExp["currency"] != "USD" {
+		t.Errorf("expected first expense currency to remain USD, got %v", firstExp["currency"])
+	}
+	if secondExp["currency"] != "INR" {
+		t.Errorf("expected second expense currency to remain INR, got %v", secondExp["currency"])
+	}
+}
+
+func TestHistoryBasedCategoryResolution(t *testing.T) {
+	server, db, entClient := setupTestServer(t)
+	defer server.Close()
+	defer entClient.Close()
+	defer db.Close()
+
+	// 1. Register User
+	registerPayload, _ := json.Marshal(map[string]string{
+		"username": "history_tester",
+		"password": "password123",
+	})
+	resp, _ := http.Post(
+		fmt.Sprintf("%s/expense.v1.AuthService/Register", server.URL),
+		"application/json",
+		bytes.NewBuffer(registerPayload),
+	)
+	var registerRes map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&registerRes)
+	resp.Body.Close()
+	token := registerRes["token"].(string)
+
+	client := &http.Client{}
+
+	// 2. Create custom category "Luxuries"
+	catPayload, _ := json.Marshal(map[string]string{
+		"name":  "Luxuries",
+		"color": "#990099",
+	})
+	reqCat, _ := http.NewRequest("POST", fmt.Sprintf("%s/expense.v1.ExpenseService/CreateCategory", server.URL), bytes.NewBuffer(catPayload))
+	reqCat.Header.Set("Content-Type", "application/json")
+	reqCat.Header.Set("Authorization", "Bearer "+token)
+	respCat, _ := client.Do(reqCat)
+	var catRes map[string]interface{}
+	json.NewDecoder(respCat.Body).Decode(&catRes)
+	respCat.Body.Close()
+	luxuriesCatID := int(catRes["category"].(map[string]interface{})["id"].(float64))
+
+	// 3. Log a specific custom dish/item "Truffle Fries" in "Luxuries" category manually
+	expPayload, _ := json.Marshal(map[string]interface{}{
+		"title":       "Truffle Fries",
+		"amount":      18.50,
+		"category_id": luxuriesCatID,
+	})
+	reqExp, _ := http.NewRequest("POST", fmt.Sprintf("%s/expense.v1.ExpenseService/CreateExpense", server.URL), bytes.NewBuffer(expPayload))
+	reqExp.Header.Set("Content-Type", "application/json")
+	reqExp.Header.Set("Authorization", "Bearer "+token)
+	respExp, _ := client.Do(reqExp)
+	respExp.Body.Close()
+
+	// 4. Send a chatbot chat message logging "Truffle Fries" again, but without specifying category
+	// Chatbot uses SendChatMessage which parses "truffle fries for 20 rupees" -> title "Truffle Fries", fallback category "Others".
+	// But since the user previously manually logged "Truffle Fries" under "Luxuries", it should automatically resolve to "Luxuries"!
+	chatPayload, _ := json.Marshal(map[string]string{
+		"message_text": "truffle fries for 20 rupees",
+	})
+	reqChat, _ := http.NewRequest("POST", fmt.Sprintf("%s/expense.v1.ExpenseService/SendChatMessage", server.URL), bytes.NewBuffer(chatPayload))
+	reqChat.Header.Set("Content-Type", "application/json")
+	reqChat.Header.Set("Authorization", "Bearer "+token)
+	respChat, err := client.Do(reqChat)
+	if err != nil {
+		t.Fatalf("chat request failed: %v", err)
+	}
+	var chatRes map[string]interface{}
+	json.NewDecoder(respChat.Body).Decode(&chatRes)
+	respChat.Body.Close()
+
+	botResponse := chatRes["botResponse"].(map[string]interface{})
+	replyText := botResponse["messageText"].(string)
+
+	expectedReply := "Successfully logged an expense: ₹20.00 for 'Truffle fries' in category 'Luxuries'."
+	if replyText != expectedReply {
+		t.Errorf("Expected bot reply %q, got %q", expectedReply, replyText)
+	}
+}

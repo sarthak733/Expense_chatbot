@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -50,11 +51,26 @@ func (h *Handler) UpdateBudget(
 		dbCategoryID.Valid = true
 	}
 
-	query := `
-		UPDATE budgets
-		SET category_id = $1, amount = $2, start_date = $3, end_date = $4
-		WHERE id = $5 AND user_id = $6
-		RETURNING id, user_id, category_id, amount, period, start_date, end_date, created_at`
+	currency := strings.TrimSpace(req.Msg.Currency)
+
+	var query string
+	var args []interface{}
+
+	if currency != "" {
+		query = `
+			UPDATE budgets
+			SET category_id = $1, amount = $2, start_date = $3, end_date = $4, currency = $5
+			WHERE id = $6 AND user_id = $7
+			RETURNING id, user_id, category_id, amount, period, start_date, end_date, created_at, currency`
+		args = []interface{}{dbCategoryID, req.Msg.Amount, startDate, endDate, currency, req.Msg.Id, userID}
+	} else {
+		query = `
+			UPDATE budgets
+			SET category_id = $1, amount = $2, start_date = $3, end_date = $4
+			WHERE id = $5 AND user_id = $6
+			RETURNING id, user_id, category_id, amount, period, start_date, end_date, created_at, currency`
+		args = []interface{}{dbCategoryID, req.Msg.Amount, startDate, endDate, req.Msg.Id, userID}
+	}
 
 	var (
 		b             expensev1.Budget
@@ -64,8 +80,8 @@ func (h *Handler) UpdateBudget(
 		createdAt     time.Time
 	)
 
-	err = h.DB.QueryRowContext(ctx, query, dbCategoryID, req.Msg.Amount, startDate, endDate, req.Msg.Id, userID).
-		Scan(&b.Id, &b.UserId, &resCategoryID, &b.Amount, &b.Period, &resStartDate, &resEndDate, &createdAt)
+	err = h.DB.QueryRowContext(ctx, query, args...).
+		Scan(&b.Id, &b.UserId, &resCategoryID, &b.Amount, &b.Period, &resStartDate, &resEndDate, &createdAt, &b.Currency)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -80,16 +96,16 @@ func (h *Handler) UpdateBudget(
 	b.EndDate = resEndDate.Format("2006-01-02")
 	b.CreatedAt = formatTime(createdAt)
 
-	// Calculate spent so far
+	// Calculate spent so far, matching the budget's currency
 	var spent float64
 	if resCategoryID.Valid {
-		spentQuery := `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND category_id = $2 AND created_at >= $3 AND created_at < $4`
+		spentQuery := `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND category_id = $2 AND created_at >= $3 AND created_at < $4 AND currency = $5`
 		nextDay := resEndDate.AddDate(0, 0, 1)
-		_ = h.DB.QueryRowContext(ctx, spentQuery, userID, resCategoryID.Int32, resStartDate, nextDay).Scan(&spent)
+		_ = h.DB.QueryRowContext(ctx, spentQuery, userID, resCategoryID.Int32, resStartDate, nextDay, b.Currency).Scan(&spent)
 	} else {
-		spentQuery := `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at < $3`
+		spentQuery := `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at < $3 AND currency = $4`
 		nextDay := resEndDate.AddDate(0, 0, 1)
-		_ = h.DB.QueryRowContext(ctx, spentQuery, userID, resStartDate, nextDay).Scan(&spent)
+		_ = h.DB.QueryRowContext(ctx, spentQuery, userID, resStartDate, nextDay, b.Currency).Scan(&spent)
 	}
 
 	b.Spent = spent

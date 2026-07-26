@@ -24,7 +24,7 @@ func (h *Handler) ListExpenses(
 	countQuery := `SELECT COUNT(*) FROM expenses WHERE user_id = $1`
 	countArgs := []interface{}{userID}
 
-	query := `SELECT id, user_id, title, amount, COALESCE(category, ''), COALESCE(category_id, 0), created_at FROM expenses WHERE user_id = $1`
+	query := `SELECT id, user_id, title, amount, COALESCE(category, ''), COALESCE(category_id, 0), created_at, currency FROM expenses WHERE user_id = $1`
 	args := []interface{}{userID}
 	argIdx := 2
 
@@ -87,7 +87,7 @@ func (h *Handler) ListExpenses(
 			exp       expensev1.Expense
 			createdAt time.Time
 		)
-		if err := rows.Scan(&exp.Id, &exp.UserId, &exp.Title, &exp.Amount, &exp.Category, &exp.CategoryId, &createdAt); err != nil {
+		if err := rows.Scan(&exp.Id, &exp.UserId, &exp.Title, &exp.Amount, &exp.Category, &exp.CategoryId, &createdAt, &exp.Currency); err != nil {
 			log.Printf("ERROR scanning expense row: %v", err)
 			return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
 		}

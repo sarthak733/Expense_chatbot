@@ -23,7 +23,7 @@ func (h *Handler) GetExpense(
 	}
 
 	query := `
-		SELECT id, user_id, title, amount, COALESCE(category, ''), COALESCE(category_id, 0), created_at
+		SELECT id, user_id, title, amount, COALESCE(category, ''), COALESCE(category_id, 0), created_at, currency
 		FROM expenses
 		WHERE id = $1 AND user_id = $2`
 
@@ -32,7 +32,7 @@ func (h *Handler) GetExpense(
 		createdAt time.Time
 	)
 	err := h.DB.QueryRowContext(ctx, query, req.Msg.Id, userID).
-		Scan(&exp.Id, &exp.UserId, &exp.Title, &exp.Amount, &exp.Category, &exp.CategoryId, &createdAt)
+		Scan(&exp.Id, &exp.UserId, &exp.Title, &exp.Amount, &exp.Category, &exp.CategoryId, &createdAt, &exp.Currency)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

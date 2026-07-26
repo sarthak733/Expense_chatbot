@@ -55,6 +55,7 @@ func (h *Handler) ListBudgets(
 		b.StartDate = startDate.Format("2006-01-02")
 		b.EndDate = endDate.Format("2006-01-02")
 		b.CreatedAt = formatTime(createdAt)
+		b.Currency = bCurrency
 
 		// Calculate spent in range — only include expenses with the same currency as this budget.
 		var spent float64
