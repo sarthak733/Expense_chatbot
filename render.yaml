@@ -21,9 +21,9 @@ services:
         sync: false   # Set this to your frontend URL after first deploy
 
   # ── 2. Svelte/Vite Frontend Static Site ─────────────────────────────────────
-  - type: static
+  - type: web
     name: expense-tracker-frontend
-    env: static
+    runtime: static
     buildCommand: npm install && npm run build
     publishPath: dist
     rootDirectory: Frontend
