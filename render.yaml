@@ -2,9 +2,10 @@ services:
   # ── 1. Go Backend Web Service ────────────────────────────────────────────────
   - type: web
     name: expense-tracker-backend
-    env: docker
-    dockerfilePath: expense-server/Dockerfile
-    dockerContext: expense-server
+    runtime: go
+    rootDir: expense-server
+    buildCommand: go build -o server ./cmd/server
+    startCommand: ./server
     plan: free
     envVars:
       - key: APP_ENV
