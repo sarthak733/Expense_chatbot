@@ -25,8 +25,8 @@ services:
     name: expense-tracker-frontend
     runtime: static
     buildCommand: npm install && npm run build
-    publishPath: dist
-    rootDirectory: Frontend
+    staticPublishPath: ./dist
+    rootDir: Frontend
     envVars:
       - key: VITE_API_URL
         sync: false   # Set this to your backend URL after first deploy
