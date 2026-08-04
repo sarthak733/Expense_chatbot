@@ -31,13 +31,15 @@
     }
   }
 
+  let baseInput = "";
+
   onMount(async () => {
     // Initialize Web Speech API
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
       recognition.continuous = false;
-      recognition.interimResults = false;
+      recognition.interimResults = true;
       recognition.lang = "en-IN"; // English with Indian support
 
       recognition.onstart = () => {
@@ -45,9 +47,19 @@
       };
 
       recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        if (transcript) {
-          input = (input ? input + " " : "") + transcript;
+        let finalTranscript = "";
+        let interimTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        if (finalTranscript || interimTranscript) {
+          input = baseInput + (finalTranscript + interimTranscript);
         }
       };
 
@@ -70,13 +82,14 @@
 
   function toggleListening() {
     if (!recognition) {
-      pushToast("Voice input is not supported in this browser.", "warning");
+      pushToast("Voice input is not supported in this browser. Please use Chrome, Safari, or Edge.", "warning");
       return;
     }
 
     if (isListening) {
       recognition.stop();
     } else {
+      baseInput = input ? input.trim() + " " : "";
       try {
         recognition.start();
       } catch (err) {
