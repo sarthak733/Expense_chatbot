@@ -13,11 +13,11 @@ func Start(ctx context.Context, db *sql.DB, checkInterval time.Duration) {
 	ticker := time.NewTicker(checkInterval)
 	go func() {
 		// Run once immediately on startup
-		runScheduler(ctx, db)
+		RunScheduler(ctx, db)
 		for {
 			select {
 			case <-ticker.C:
-				runScheduler(ctx, db)
+				RunScheduler(ctx, db)
 			case <-ctx.Done():
 				ticker.Stop()
 				return
@@ -26,8 +26,8 @@ func Start(ctx context.Context, db *sql.DB, checkInterval time.Duration) {
 	}()
 }
 
-// runScheduler queries the database for recurring expenses that need to run and executes them transactionally.
-func runScheduler(ctx context.Context, db *sql.DB) {
+// RunScheduler queries the database for recurring expenses that need to run and executes them transactionally.
+func RunScheduler(ctx context.Context, db *sql.DB) {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		log.Printf("Scheduler ERROR: failed to start transaction: %v", err)
@@ -37,7 +37,7 @@ func runScheduler(ctx context.Context, db *sql.DB) {
 
 	// Select active recurring expenses that are due (next_run_date <= CURRENT_DATE)
 	query := `
-		SELECT id, user_id, title, amount, category_id, interval, next_run_date
+		SELECT id, user_id, title, amount, category_id, interval, next_run_date, currency
 		FROM recurring_expenses
 		WHERE is_active = TRUE AND next_run_date <= CURRENT_DATE
 		FOR UPDATE
@@ -57,12 +57,13 @@ func runScheduler(ctx context.Context, db *sql.DB) {
 		categoryID  sql.NullInt32
 		interval    string
 		nextRunDate time.Time
+		currency    string
 	}
 
 	var jobs []recurringJob
 	for rows.Next() {
 		var j recurringJob
-		if err := rows.Scan(&j.id, &j.userID, &j.title, &j.amount, &j.categoryID, &j.interval, &j.nextRunDate); err != nil {
+		if err := rows.Scan(&j.id, &j.userID, &j.title, &j.amount, &j.categoryID, &j.interval, &j.nextRunDate, &j.currency); err != nil {
 			log.Printf("Scheduler ERROR: scan failed: %v", err)
 			return
 		}
@@ -97,10 +98,10 @@ func runScheduler(ctx context.Context, db *sql.DB) {
 			// Insert expense
 			// We format the date to the exact date it was supposed to run
 			insertQuery := `
-				INSERT INTO expenses (user_id, title, amount, category, category_id, created_at)
-				VALUES ($1, $2, $3, $4, $5, $6)
+				INSERT INTO expenses (user_id, title, amount, category, category_id, created_at, currency)
+				VALUES ($1, $2, $3, $4, $5, $6, $7)
 			`
-			_, err = tx.ExecContext(ctx, insertQuery, j.userID, j.title, j.amount, categoryName, j.categoryID, nextRun)
+			_, err = tx.ExecContext(ctx, insertQuery, j.userID, j.title, j.amount, categoryName, j.categoryID, nextRun, j.currency)
 			if err != nil {
 				log.Printf("Scheduler ERROR: failed to insert expense: %v", err)
 				break

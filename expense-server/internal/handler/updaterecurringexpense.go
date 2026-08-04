@@ -11,6 +11,7 @@ import (
 	"connectrpc.com/connect"
 	expensev1 "expense-server/gen/expense/v1"
 	"expense-server/internal/middleware"
+	"expense-server/internal/scheduler"
 )
 
 func (h *Handler) UpdateRecurringExpense(
@@ -87,6 +88,9 @@ func (h *Handler) UpdateRecurringExpense(
 		log.Printf("ERROR updating recurring expense: %v", err)
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("internal database error"))
 	}
+
+	// Trigger the scheduler immediately to process the updated recurring expense if it is due today.
+	scheduler.RunScheduler(ctx, h.DB)
 
 	r.CategoryId = resCategoryID.Int32
 	r.Category = categoryName

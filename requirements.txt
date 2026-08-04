@@ -1,0 +1,4 @@
+# This project is built using Go (Golang) and Node.js (Svelte).
+# Python is not used in the core stack, so no python dependencies are required.
+# Backend dependencies are managed in expense-server/go.mod.
+# Frontend dependencies are managed in Frontend/package.json.
