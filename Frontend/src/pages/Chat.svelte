@@ -33,6 +33,8 @@
 
   let baseInput = ""; // text in the box before mic was started
   let finalAccumulated = ""; // locked-in confirmed speech from this session
+  let latestInterim = ""; // most recent unconfirmed preview text
+  let manualStop = false; // true when the user tapped stop (vs auto/error end)
 
   onMount(async () => {
     // Initialize Web Speech API
@@ -41,11 +43,12 @@
       recognition = new SpeechRecognition();
       recognition.continuous = true;      // keep mic open until user taps again
       recognition.interimResults = true;  // show live preview as user speaks
-      recognition.lang = "en-IN";
+      recognition.lang = "en-US";         // Chrome's fastest/most accurate model; en-IN adds latency
 
       recognition.onstart = () => {
         isListening = true;
         finalAccumulated = "";
+        latestInterim = "";
       };
 
       recognition.onresult = (event: any) => {
@@ -65,6 +68,7 @@
         input = baseInput + sessionFinal + sessionInterim;
         // Track the confirmed portion so interim preview doesn't duplicate it
         finalAccumulated = sessionFinal;
+        latestInterim = sessionInterim;
       };
 
       recognition.onerror = (event: any) => {
@@ -75,8 +79,14 @@
       };
 
       recognition.onend = () => {
-        // Lock final text: drop any dangling interim
-        input = baseInput + finalAccumulated;
+        // If the user manually stopped, we already locked the text in
+        // toggleListening() the instant they tapped stop — no need to wait
+        // for the browser's own (often slow) finalization round-trip.
+        // Only fall back to finalAccumulated here for auto/error endings.
+        if (!manualStop) {
+          input = baseInput + finalAccumulated;
+        }
+        manualStop = false;
         isListening = false;
       };
     }
@@ -93,11 +103,18 @@
     }
 
     if (isListening) {
-      recognition.stop(); // onend will lock the final text
+      // Lock in whatever is already shown right now — don't wait for the
+      // browser's official "final" result, which can take a couple of
+      // seconds after you stop talking.
+      input = baseInput + finalAccumulated + latestInterim;
+      manualStop = true;
+      isListening = false;
+      recognition.stop();
     } else {
       // Snapshot whatever is already typed so we can append cleanly
       baseInput = input ? input.trim() + " " : "";
       finalAccumulated = "";
+      latestInterim = "";
       try {
         recognition.start();
       } catch (err) {
