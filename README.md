@@ -17,9 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="file:///e:/ExpenseTracker_Go/Expense_chatbot/deploymen.readme">📖 Deployment Guide</a> · 
-  <a href="http://localhost:5173">🚀 Live Frontend</a> · 
-  <a href="http://localhost:8080">🎯 Live Backend</a>
+  <a href="https://expense-tracker-frontend-8cfy.onrender.com">🚀 Live Application Demo</a>
 </p>
 
 ---
@@ -56,13 +54,13 @@ Ledger follows a strict separation of concerns, routing typed RPC calls over HTT
 ```mermaid
 graph TD
     %% Client Layer
-    subgraph Client Layer
+    subgraph client_layer ["Client Layer"]
         Browser[User Browser]
         Svelte[Svelte 5 Frontend]
     end
 
     %% Application Layer
-    subgraph Application Layer
+    subgraph app_layer ["Application Layer"]
         GoServer[Go Backend Server]
         Auth[JWT Auth Interceptor]
         NLPEngine[Go NLP Parser]
@@ -70,7 +68,7 @@ graph TD
     end
 
     %% Database Layer
-    subgraph Data Layer
+    subgraph data_layer ["Data Layer"]
         DB[(PostgreSQL Database)]
     end
 
