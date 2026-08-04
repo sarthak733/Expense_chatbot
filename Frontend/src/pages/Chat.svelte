@@ -14,6 +14,9 @@
   const PAGE = 30;
   let scrollEl: HTMLDivElement;
 
+  let isListening = false;
+  let recognition: any = null;
+
   async function loadHistory(initial = false) {
     try {
       const res = await expenseClient.getChatHistory({ limit: PAGE, offset });
@@ -29,10 +32,58 @@
   }
 
   onMount(async () => {
+    // Initialize Web Speech API
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-IN"; // English with Indian support
+
+      recognition.onstart = () => {
+        isListening = true;
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          input = (input ? input + " " : "") + transcript;
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error:", event.error);
+        if (event.error !== "no-speech") {
+          pushToast("Voice input error: " + event.error, "error");
+        }
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+      };
+    }
+
     await loadHistory(true);
     await tick();
     scrollToBottom();
   });
+
+  function toggleListening() {
+    if (!recognition) {
+      pushToast("Voice input is not supported in this browser.", "warning");
+      return;
+    }
+
+    if (isListening) {
+      recognition.stop();
+    } else {
+      try {
+        recognition.start();
+      } catch (err) {
+        console.error("Failed to start speech recognition:", err);
+      }
+    }
+  }
 
   function scrollToBottom() {
     if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight;
@@ -126,11 +177,25 @@
   <div class="composer">
     <textarea
       rows="1"
-      placeholder="Log an expense or ask a question…"
+      placeholder={isListening ? "Listening..." : "Log an expense or ask a question…"}
       bind:value={input}
       on:keydown={handleKeydown}
+      disabled={isListening}
     ></textarea>
-    <button class="btn btn-gold" on:click={send} disabled={sending || !input.trim()}>
+    {#if recognition}
+      <button
+        class="btn btn-ghost mic-btn"
+        class:listening={isListening}
+        on:click={toggleListening}
+        title={isListening ? "Stop listening" : "Start voice input"}
+        type="button"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/>
+        </svg>
+      </button>
+    {/if}
+    <button class="btn btn-gold" on:click={send} disabled={sending || !input.trim() || isListening}>
       Send
     </button>
   </div>
@@ -276,5 +341,40 @@
   .composer .btn {
     padding: 12px 22px;
     flex-shrink: 0;
+  }
+
+  .composer .mic-btn {
+    padding: 12px;
+    height: 43px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .composer .mic-btn:hover {
+    color: var(--ink);
+    background: var(--surface-sunk);
+  }
+
+  .composer .mic-btn.listening {
+    color: #ffffff;
+    background: var(--rust);
+    border-color: var(--rust);
+    animation: mic-pulse 1.5s infinite;
+  }
+
+  @keyframes mic-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(168, 67, 44, 0.5);
+    }
+    70% {
+      box-shadow: 0 0 0 8px rgba(168, 67, 44, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(168, 67, 44, 0);
+    }
   }
 </style>
