@@ -31,36 +31,40 @@
     }
   }
 
-  let baseInput = "";
+  let baseInput = ""; // text in the box before mic was started
+  let finalAccumulated = ""; // locked-in confirmed speech from this session
 
   onMount(async () => {
     // Initialize Web Speech API
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = "en-IN"; // English with Indian support
+      recognition.continuous = true;      // keep mic open until user taps again
+      recognition.interimResults = true;  // show live preview as user speaks
+      recognition.lang = "en-IN";
 
       recognition.onstart = () => {
         isListening = true;
+        finalAccumulated = "";
       };
 
       recognition.onresult = (event: any) => {
-        let finalTranscript = "";
-        let interimTranscript = "";
+        let sessionFinal = "";
+        let sessionInterim = "";
 
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
+        // Walk only the NEW results from this event batch
+        for (let i = 0; i < event.results.length; i++) {
           if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
+            sessionFinal += event.results[i][0].transcript;
           } else {
-            interimTranscript += event.results[i][0].transcript;
+            sessionInterim += event.results[i][0].transcript;
           }
         }
 
-        if (finalTranscript || interimTranscript) {
-          input = baseInput + (finalTranscript + interimTranscript);
-        }
+        // Build display: pre-mic text + all confirmed speech + live preview
+        input = baseInput + sessionFinal + sessionInterim;
+        // Track the confirmed portion so interim preview doesn't duplicate it
+        finalAccumulated = sessionFinal;
       };
 
       recognition.onerror = (event: any) => {
@@ -71,6 +75,8 @@
       };
 
       recognition.onend = () => {
+        // Lock final text: drop any dangling interim
+        input = baseInput + finalAccumulated;
         isListening = false;
       };
     }
@@ -87,9 +93,11 @@
     }
 
     if (isListening) {
-      recognition.stop();
+      recognition.stop(); // onend will lock the final text
     } else {
+      // Snapshot whatever is already typed so we can append cleanly
       baseInput = input ? input.trim() + " " : "";
+      finalAccumulated = "";
       try {
         recognition.start();
       } catch (err) {
