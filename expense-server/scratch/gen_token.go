@@ -1,4 +1,4 @@
-package main
+package scratch
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 
 // Usage: go run ./scratch/gen_token.go <user_id>
 // Example: go run ./scratch/gen_token.go 1
-func main() {
+func GenToken() {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
 		fmt.Fprintln(os.Stderr, "ERROR: JWT_SECRET env var is not set")

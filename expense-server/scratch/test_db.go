@@ -1,4 +1,4 @@
-package main
+package scratch
 
 import (
 	"database/sql"
@@ -7,7 +7,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func main() {
+func TestDB() {
 	passwords := []string{"postgres", "sergtsop", "admin", "root", ""}
 	dbName := "expense_tracker" // we will also try default "postgres" first to see if authentication succeeds
 

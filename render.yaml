@@ -4,6 +4,8 @@ services:
     name: expense-tracker-backend
     runtime: go
     rootDir: expense-server
+    branch: asbah
+    autoDeploy: true
     buildCommand: go build -o server ./cmd/server
     startCommand: ./server
     plan: free
@@ -27,6 +29,8 @@ services:
   - type: web
     name: expense-tracker-frontend
     runtime: static
+    branch: asbah
+    autoDeploy: true
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     rootDir: Frontend
@@ -38,3 +42,4 @@ databases:
   # ── 3. Managed PostgreSQL Database ──────────────────────────────────────────
   - name: expense-tracker-db
     plan: free
+

@@ -1,4 +1,4 @@
-package main
+package scratch
 
 import (
 	"database/sql"
@@ -9,7 +9,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func main() {
+func ListUsers() {
 	// Read .env if possible
 	dbURL := "postgres://postgres:sergtsop@localhost:5432/expense_tracker?sslmode=disable"
 	if content, err := os.ReadFile(".env"); err == nil {
