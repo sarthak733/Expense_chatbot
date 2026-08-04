@@ -42,6 +42,18 @@ func (h *Handler) resolveCategory(ctx context.Context, userID int, categoryID in
 		}
 	}
 
+	// Case 0b: Check if the title matches an existing category name (user-specific or global) case-insensitively.
+	// This helps route expenses like "office 500" to the custom category "Office" even if it's the first time logging it.
+	if categoryID <= 0 && title != "" {
+		var id int32
+		var name string
+		query := `SELECT id, name FROM categories WHERE LOWER(name) = LOWER($1) AND (user_id = $2 OR user_id IS NULL) LIMIT 1`
+		err := h.DB.QueryRowContext(ctx, query, title, userID).Scan(&id, &name)
+		if err == nil {
+			return id, name, nil
+		}
+	}
+
 	// Case 1: category_id is explicitly provided and valid
 	if categoryID > 0 {
 		var name string

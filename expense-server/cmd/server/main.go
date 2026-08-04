@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"time"
+	_ "time/tzdata"
 
 	"connectrpc.com/connect"
 	"entgo.io/ent/dialect"
@@ -26,6 +27,19 @@ import (
 )
 
 func main() {
+	// Set default timezone to Asia/Kolkata if not set
+	tz := os.Getenv("TZ")
+	if tz == "" {
+		tz = "Asia/Kolkata"
+	}
+	loc, err := time.LoadLocation(tz)
+	if err == nil {
+		time.Local = loc
+		log.Printf("Process local timezone set to: %s", tz)
+	} else {
+		log.Printf("WARNING: failed to load timezone %s: %v", tz, err)
+	}
+
 	cfg := config.Load()
 
 	// Warn early if JWT secret is missing — the auth interceptor will reject
@@ -41,6 +55,18 @@ func main() {
 	}
 	defer db.Close()
 	log.Println("database connection pool established successfully")
+
+	// Migrate existing records to INR if they use default USD
+	if _, err := db.Exec(`
+		UPDATE users SET currency = 'INR' WHERE currency = 'USD';
+		UPDATE budgets SET currency = 'INR' WHERE currency = 'USD';
+		UPDATE expenses SET currency = 'INR' WHERE currency = 'USD';
+		UPDATE recurring_expenses SET currency = 'INR' WHERE currency = 'USD';
+	`); err != nil {
+		log.Printf("WARNING: failed to migrate existing currencies: %v", err)
+	} else {
+		log.Println("Successfully migrated existing records from USD to INR currency defaults")
+	}
  
 	// Run schema migrations
 	if err := database.ApplyMigrations(db, "migrations"); err != nil {

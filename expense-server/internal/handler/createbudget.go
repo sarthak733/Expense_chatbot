@@ -32,12 +32,12 @@ func (h *Handler) CreateBudget(
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("period must be weekly, monthly, or yearly"))
 	}
 
-	// Parse start and end dates
-	startDate, err := time.Parse("2006-01-02", req.Msg.StartDate)
+	// Parse start and end dates in local timezone
+	startDate, err := time.ParseInLocation("2006-01-02", req.Msg.StartDate, time.Local)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("start_date must be in YYYY-MM-DD format"))
 	}
-	endDate, err := time.Parse("2006-01-02", req.Msg.EndDate)
+	endDate, err := time.ParseInLocation("2006-01-02", req.Msg.EndDate, time.Local)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("end_date must be in YYYY-MM-DD format"))
 	}
@@ -82,14 +82,15 @@ func (h *Handler) CreateBudget(
 	// Status tracking calculation (spent so far).
 	// Only count expenses in the same currency as this budget to avoid cross-currency mixing.
 	var spent float64
+	nextDay := endDate.AddDate(0, 0, 1)
 	if dbCategoryID.Valid {
 		_ = h.DB.QueryRowContext(ctx,
-			`SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND category_id = $2 AND created_at >= $3 AND created_at <= $4 AND currency = $5`,
-			userID, dbCategoryID.Int32, startDate, endDate, currency).Scan(&spent)
+			`SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND category_id = $2 AND created_at >= $3 AND created_at < $4 AND currency = $5`,
+			userID, dbCategoryID.Int32, startDate, nextDay, currency).Scan(&spent)
 	} else {
 		_ = h.DB.QueryRowContext(ctx,
-			`SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at <= $3 AND currency = $4`,
-			userID, startDate, endDate, currency).Scan(&spent)
+			`SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1 AND created_at >= $2 AND created_at < $3 AND currency = $4`,
+			userID, startDate, nextDay, currency).Scan(&spent)
 	}
 
 	remaining := req.Msg.Amount - spent

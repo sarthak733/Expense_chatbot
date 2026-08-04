@@ -32,7 +32,7 @@ func (h *Handler) CreateRecurringExpense(
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("interval must be daily, weekly, monthly, or yearly"))
 	}
 
-	nextRunDate, err := time.Parse("2006-01-02", req.Msg.NextRunDate)
+	nextRunDate, err := time.ParseInLocation("2006-01-02", req.Msg.NextRunDate, time.Local)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("next_run_date must be in YYYY-MM-DD format"))
 	}

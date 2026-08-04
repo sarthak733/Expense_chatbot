@@ -12,6 +12,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -p 1 -ldflags="-s -w" -o server ./cmd/serv
 # ── Runner stage ──────────────────────────────────────────────────────────────
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates tzdata
+ENV TZ=Asia/Kolkata
 WORKDIR /app
 
 COPY --from=builder /app/server .

@@ -71,7 +71,11 @@
         .then((res) => {
           if (res.profile?.currency) currency.set(res.profile.currency);
           const t = res.profile?.theme;
-          if (t === "light" || t === "dark" || t === "system") applyTheme(t);
+          if (t === "light" || t === "dark") {
+            applyTheme(t);
+          } else {
+            applyTheme("light");
+          }
         })
         .catch(() => {
           // not fatal — pages fall back to the INR default and last theme

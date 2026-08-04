@@ -20,6 +20,8 @@ services:
         generateValue: true
       - key: CORS_ALLOWED_ORIGINS
         sync: false   # Set this to your frontend URL after first deploy
+      - key: TZ
+        value: Asia/Kolkata
 
   # ── 2. Svelte/Vite Frontend Static Site ─────────────────────────────────────
   - type: web

@@ -320,8 +320,8 @@ func TestUserProfileFlow(t *testing.T) {
 	json.NewDecoder(respGet.Body).Decode(&getRes)
 	profile := getRes["profile"].(map[string]interface{})
 
-	if profile["currency"] != "USD" {
-		t.Errorf("expected default currency USD, got %v", profile["currency"])
+	if profile["currency"] != "INR" {
+		t.Errorf("expected default currency INR, got %v", profile["currency"])
 	}
 	if profile["theme"] != "system" {
 		t.Errorf("expected default theme system, got %v", profile["theme"])
@@ -642,6 +642,65 @@ func TestHistoryBasedCategoryResolution(t *testing.T) {
 	replyText := botResponse["messageText"].(string)
 
 	expectedReply := "Successfully logged an expense: ₹20.00 for 'Truffle fries' in category 'Luxuries'."
+	if replyText != expectedReply {
+		t.Errorf("Expected bot reply %q, got %q", expectedReply, replyText)
+	}
+}
+
+func TestCustomCategoryResolutionByName(t *testing.T) {
+	server, db, entClient := setupTestServer(t)
+	defer server.Close()
+	defer entClient.Close()
+	defer db.Close()
+
+	// 1. Register User
+	registerPayload, _ := json.Marshal(map[string]string{
+		"username": "catname_tester",
+		"password": "password123",
+	})
+	resp, _ := http.Post(
+		fmt.Sprintf("%s/expense.v1.AuthService/Register", server.URL),
+		"application/json",
+		bytes.NewBuffer(registerPayload),
+	)
+	var registerRes map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&registerRes)
+	resp.Body.Close()
+	token := registerRes["token"].(string)
+
+	client := &http.Client{}
+
+	// 2. Create custom category "Office"
+	catPayload, _ := json.Marshal(map[string]string{
+		"name":  "Office",
+		"color": "#112233",
+	})
+	reqCat, _ := http.NewRequest("POST", fmt.Sprintf("%s/expense.v1.ExpenseService/CreateCategory", server.URL), bytes.NewBuffer(catPayload))
+	reqCat.Header.Set("Content-Type", "application/json")
+	reqCat.Header.Set("Authorization", "Bearer "+token)
+	respCat, _ := client.Do(reqCat)
+	respCat.Body.Close()
+
+	// 3. Send a chatbot chat message logging "Office 500" without prior history.
+	// It should automatically resolve to the "Office" custom category by matching the title/category name case-insensitively!
+	chatPayload, _ := json.Marshal(map[string]string{
+		"message_text": "office 500",
+	})
+	reqChat, _ := http.NewRequest("POST", fmt.Sprintf("%s/expense.v1.ExpenseService/SendChatMessage", server.URL), bytes.NewBuffer(chatPayload))
+	reqChat.Header.Set("Content-Type", "application/json")
+	reqChat.Header.Set("Authorization", "Bearer "+token)
+	respChat, err := client.Do(reqChat)
+	if err != nil {
+		t.Fatalf("chat request failed: %v", err)
+	}
+	var chatRes map[string]interface{}
+	json.NewDecoder(respChat.Body).Decode(&chatRes)
+	respChat.Body.Close()
+
+	botResponse := chatRes["botResponse"].(map[string]interface{})
+	replyText := botResponse["messageText"].(string)
+
+	expectedReply := "Successfully logged an expense: ₹500.00 for 'Office' in category 'Office'."
 	if replyText != expectedReply {
 		t.Errorf("Expected bot reply %q, got %q", expectedReply, replyText)
 	}

@@ -29,28 +29,37 @@ func (h *Handler) ListExpenses(
 	argIdx := 2
 
 	if req.Msg.StartDate != "" {
-		if _, err := time.Parse(time.RFC3339, req.Msg.StartDate); err != nil {
-			if _, err := time.Parse("2006-01-02", req.Msg.StartDate); err != nil {
+		var t time.Time
+		var err error
+		t, err = time.Parse(time.RFC3339, req.Msg.StartDate)
+		if err != nil {
+			t, err = time.ParseInLocation("2006-01-02", req.Msg.StartDate, time.Local)
+			if err != nil {
 				return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("start_date must be RFC3339 or YYYY-MM-DD"))
 			}
 		}
 		query += fmt.Sprintf(" AND created_at >= $%d", argIdx)
 		countQuery += fmt.Sprintf(" AND created_at >= $%d", argIdx)
-		args = append(args, req.Msg.StartDate)
-		countArgs = append(countArgs, req.Msg.StartDate)
+		args = append(args, t)
+		countArgs = append(countArgs, t)
 		argIdx++
 	}
 
 	if req.Msg.EndDate != "" {
-		if _, err := time.Parse(time.RFC3339, req.Msg.EndDate); err != nil {
-			if _, err := time.Parse("2006-01-02", req.Msg.EndDate); err != nil {
+		var t time.Time
+		var err error
+		t, err = time.Parse(time.RFC3339, req.Msg.EndDate)
+		if err != nil {
+			t, err = time.ParseInLocation("2006-01-02", req.Msg.EndDate, time.Local)
+			if err != nil {
 				return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("end_date must be RFC3339 or YYYY-MM-DD"))
 			}
+			t = t.AddDate(0, 0, 1).Add(-time.Nanosecond)
 		}
 		query += fmt.Sprintf(" AND created_at <= $%d", argIdx)
 		countQuery += fmt.Sprintf(" AND created_at <= $%d", argIdx)
-		args = append(args, req.Msg.EndDate)
-		countArgs = append(countArgs, req.Msg.EndDate)
+		args = append(args, t)
+		countArgs = append(countArgs, t)
 		argIdx++
 	}
 

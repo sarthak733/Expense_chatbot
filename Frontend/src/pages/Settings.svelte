@@ -16,7 +16,7 @@
   let firstName = "";
   let lastName = "";
   let currency = "INR";
-  let theme = "system";
+  let theme = "light";
   let weeklyStart = "monday";
   let monthlyStartDay = 1;
   let budgetAlertThreshold = 80;
@@ -38,14 +38,12 @@
         firstName = profile.firstName;
         lastName = profile.lastName;
         currency = profile.currency || "INR";
-        theme = profile.theme || "system";
+        theme = profile.theme === "dark" ? "dark" : "light";
         weeklyStart = profile.weeklyStart || "monday";
         monthlyStartDay = profile.monthlyStartDay || 1;
         budgetAlertThreshold = profile.budgetAlertThreshold || 80;
         currencyStore.set(currency);
-        if (theme === "light" || theme === "dark" || theme === "system") {
-          applyTheme(theme);
-        }
+        applyTheme(theme);
       }
     } catch (err) {
       pushToast(describeError(err), "error");
@@ -166,14 +164,15 @@
             <option value="GBP">GBP (£)</option>
           </select>
         </div>
+
         <div class="field">
           <label for="s-theme">Theme</label>
           <select id="s-theme" bind:value={theme}>
-            <option value="system">System</option>
             <option value="light">Light</option>
             <option value="dark">Dark</option>
           </select>
         </div>
+
         <div class="field">
           <label for="s-week">Week starts on</label>
           <select id="s-week" bind:value={weeklyStart}>

@@ -27,11 +27,11 @@ func (h *Handler) UpdateBudget(
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("budget amount must be greater than 0"))
 	}
 
-	startDate, err := time.Parse("2006-01-02", req.Msg.StartDate)
+	startDate, err := time.ParseInLocation("2006-01-02", req.Msg.StartDate, time.Local)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("start_date must be in YYYY-MM-DD format"))
 	}
-	endDate, err := time.Parse("2006-01-02", req.Msg.EndDate)
+	endDate, err := time.ParseInLocation("2006-01-02", req.Msg.EndDate, time.Local)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("end_date must be in YYYY-MM-DD format"))
 	}

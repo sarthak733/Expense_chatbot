@@ -41,7 +41,7 @@ func (h *AuthHandler) Register(
 
 	var userID int32
 	var createdAt time.Time
-	err = h.DB.QueryRowContext(ctx, "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, created_at", req.Msg.Username, string(hash)).Scan(&userID, &createdAt)
+	err = h.DB.QueryRowContext(ctx, "INSERT INTO users (username, password_hash, currency) VALUES ($1, $2, 'INR') RETURNING id, created_at", req.Msg.Username, string(hash)).Scan(&userID, &createdAt)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeAlreadyExists, fmt.Errorf("username already exists"))
 	}

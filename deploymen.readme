@@ -1,0 +1,177 @@
+Here is a complete, step-by-step guide to deploying your application on Render. You can perform these steps yourself to configure, commit, and launch the deployment.
+
+Phase 1: Code Modifications
+To prepare the application for Render, you need to edit two existing files and create two new ones.
+
+Step 1. Update Backend CORS to support dynamic origins
+Since the production frontend and backend will run on different domains, the Go backend needs to dynamically allow CORS requests from your production frontend URL.
+
+Open 
+
+expense-server/internal/middleware/cors.go
+.
+Change the allowedOrigins function to be exported as AllowedOrigins (capitalize the first letter) and add the Vite preview port http://localhost:4173 to the default list.
+Update isAllowedOrigin to call the new capitalized function name:
+Modified cors.go code snippet:
+
+go
+// AllowedOrigins reads origins from CORS_ALLOWED_ORIGINS (comma-separated)...
+func AllowedOrigins() []string {
+	if v := os.Getenv("CORS_ALLOWED_ORIGINS"); v != "" {
+		parts := strings.Split(v, ",")
+		for i := range parts {
+			parts[i] = strings.TrimSpace(parts[i])
+		}
+		return parts
+	}
+	return []string{
+		"http://localhost:5173",
+		"http://localhost:4173", // Vite preview
+		"http://127.0.0.1:5173",
+	}
+}
+func isAllowedOrigin(origin string) bool {
+	for _, o := range AllowedOrigins() {
+		if o == origin {
+			return true
+		}
+	}
+	return false
+}
+Next, open 
+
+expense-server/cmd/server/main.go
+.
+Locate the CORS middleware configuration around line 90. Change AllowedOrigins to use your new exported function:
+Modified main.go code snippet:
+
+go
+// 6. Add CORS so the frontend can reach the backend.
+	c := cors.New(cors.Options{
+		AllowedOrigins: middleware.AllowedOrigins(),
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{
+			"Authorization",
+			"Content-Type",
+			"Connect-Protocol-Version",
+			"Connect-Timeout-Ms",
+			"Connect-Accept-Encoding",
+			"Connect-Content-Encoding",
+			"Grpc-Timeout",
+			"X-Grpc-Web",
+		},
+		AllowCredentials: true,
+	})
+Step 2. Create the Backend Dockerfile
+Render works best and most reliably when we package the Go server inside a Docker container.
+
+Create a new file named Dockerfile (no file extension) in the directory 
+
+Expense_chatbot/expense-server/Dockerfile
+ with the following content:
+
+dockerfile
+# Build stage
+FROM golang:1.23-alpine AS builder
+WORKDIR /app
+# Copy dependency files first to cache dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+# Copy the rest of the source code
+COPY . .
+# Build the server binary as a statically compiled binary
+RUN CGO_ENABLED=0 GOOS=linux go build -o server ./cmd/server
+# Final runner stage
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates tzdata
+WORKDIR /app
+# Copy the compiled binary and the migrations directory from the builder
+COPY --from=builder /app/server .
+COPY --from=builder /app/migrations ./migrations
+# Expose the default backend port
+EXPOSE 8080
+# Run the server
+CMD ["./server"]
+Step 3. Create the Render Blueprint (render.yaml)
+Render Blueprints let you configure and spin up your database, backend, and frontend at once.
+
+Create a new file named render.yaml at the root of your workspace (
+
+/e:/ExpenseTracker_Go/render.yaml
+) with the following content:
+
+yaml
+services:
+  # 1. Go Backend Web Service
+  - type: web
+    name: expense-tracker-backend
+    env: docker
+    dockerFilePath: Expense_chatbot/expense-server/Dockerfile
+    dockerContext: Expense_chatbot/expense-server
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PORT
+        value: 8080
+      - key: DATABASE_URL
+        fromDatabase:
+          name: expense-tracker-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false # You will enter the frontend static site URL here once it is deployed
+  # 2. Svelte/Vite Frontend Static Site
+  - type: static
+    name: expense-tracker-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    rootDirectory: Expense_chatbot/Frontend
+    envVars:
+      - key: VITE_API_URL
+        sync: false # You will enter the backend's URL here once it is deployed
+databases:
+  # 3. Managed PostgreSQL Database
+  - name: expense-tracker-db
+    plan: free
+Phase 2: Commit and Push to Git
+Open your terminal at the root of the project (e:\ExpenseTracker_Go) and commit these changes:
+
+bash
+# Add the modified and newly created files
+git add .
+# Commit changes
+git commit -m "chore: configure project for Render deployment"
+# Push changes to your remote GitHub/GitLab repository
+git push origin main
+Phase 3: Setup on Render
+Log in to dashboard.render.com.
+Click New + in the top right corner and select Blueprint.
+Connect your GitHub/GitLab repository.
+Render will read the render.yaml file and show the services it plans to create:
+expense-tracker-db (Database)
+expense-tracker-backend (Web Service)
+expense-tracker-frontend (Static Site)
+Under the Service Parameters prompt, Render will ask you to input values for the two environment variables marked with sync: false:
+VITE_API_URL: Enter a placeholder URL for now (e.g. https://expense-tracker-backend.onrender.com).
+CORS_ALLOWED_ORIGINS: Enter a placeholder URL for now (e.g. https://expense-tracker-frontend.onrender.com).
+Click Apply. Render will start building and spinning up the PostgreSQL database and both services.
+Phase 4: Finalize URLs (Syncing CORS & Frontend)
+Since Render might append a random suffix to your service names (e.g., expense-tracker-backend-xyz.onrender.com), you need to update the environment variables with the actual live URLs:
+
+Once the backend and frontend services have finished deploying, look at your Render Dashboard to find their actual URLs:
+Frontend URL (looks like https://expense-tracker-frontend-xxxx.onrender.com)
+Backend URL (looks like https://expense-tracker-backend-xxxx.onrender.com)
+Go to the expense-tracker-frontend service in Render:
+Navigate to Environment.
+Update VITE_API_URL to the exact URL of your deployed backend.
+Save changes. This will automatically trigger a new frontend build with the correct backend address.
+Go to the expense-tracker-backend service in Render:
+Navigate to Environment.
+Update CORS_ALLOWED_ORIGINS to the exact URL of your deployed frontend.
+Save changes. The backend will restart and begin accepting requests from the frontend.
+You are all set! Your application will be live and fully connected.
+
+10:16 PM
